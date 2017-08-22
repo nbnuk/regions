@@ -2,4 +2,7 @@ rootProject.name='regions'
 
 //include 'ala-bootstrap3'
 //project(':ala-bootstrap3').projectDir = new File('/data/src/ala-bootstrap3')
+//include 'downloads-plugin'
+//project(':downloads-plugin').projectDir = new File('../downloads-plugin')
+rootProject.name = 'regions'
 

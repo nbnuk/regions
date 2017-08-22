@@ -89,7 +89,7 @@ class RegionsTagLib {
      * @attr from REQUIRED
      * @attr to REQUIRED
      */
-    def speciesRecordListUrl = {attrs ->
+    def speciesRecordListUrl = { attrs ->
         out << metadataService.buildSpeciesRecordListUrl(attrs.guid, attrs.regionFid, attrs.regionType, attrs.regionName, attrs.regionPid, attrs.group, attrs.subgroup, attrs.from, attrs.to, attrs.showHubData, attrs.fq)
     }
 

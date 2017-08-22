@@ -302,6 +302,8 @@ class MetadataService {
             params << [fq: fq]
         }
 
+        log.debug "download params = ${params as JSON}"
+
         return params
     }
 
@@ -386,11 +388,17 @@ class MetadataService {
      * @param regionName
      * @return
      */
-    String buildRegionFacet(String regionFid, String regionType, String regionName, String regionPid) {
+    String buildRegionFacet(String regionFid, String regionType, String regionName, String regionPid, Boolean encodeValues = false) {
         //unescape regionName for q term creation
         def name = StringEscapeUtils.unescapeHtml(regionName)
+        log.debug "buildRegionFacet args: ${regionPid} || ${regionType} || ${regionName} || ${name}"
+        def qParam = regionPid == null || regionPid.isEmpty() ? "-${regionFid}:n/a AND ${regionFid}:*" : "${regionFid}:\"${name}\""
+        //regionPid == null || regionPid.isEmpty() ? "-${regionFid}:n/a AND ${regionFid}:*" : "${regionFid}:\"${name}\""
+        if (qParam && encodeValues) {
+            qParam = "${qParam.encodeAsURL()}"
+        }
 
-        regionPid == null || regionPid.isEmpty() ? "-${regionFid}:n/a AND ${regionFid}:*" : "${regionFid}:\"${name}\""
+        qParam
     }
 
     /**
