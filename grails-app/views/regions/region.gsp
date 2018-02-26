@@ -166,6 +166,7 @@
         </div>
 
         <div id="region-map"></div>
+        <div id="mapLegend"><table id="mapLegendTable"></table></div>
 
         <div class="accordion" id="opacityControls">
             <div class="accordion-group">
@@ -318,6 +319,10 @@
                 ,hubFilter:"${URLEncoder.encode(grailsApplication.config.hub.hubFilter , "UTF-8")}"
                 ,showHubData: ${hubState}
             </g:if>
+            ,mapTheme: {
+                mapEnvOptions: "${grailsApplication.config.map?.env?.options ?: 'color:' + (grailsApplication.config.map?.records?.colour ?: 'e6704c') + ';name:circle;size:4'}",
+                mapEnvLegendTitle: "${grailsApplication.config.map?.env?.legendtitle ?: ''}"
+            }
         });
 
         regionWidget.setMap(new RegionMap({

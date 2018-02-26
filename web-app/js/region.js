@@ -122,6 +122,8 @@ var RegionWidget = function (config) {
 
     var urls = {};
 
+    var mapTheme = {};
+
     var redirectDownloads = false;
 
     /**
@@ -150,6 +152,8 @@ var RegionWidget = function (config) {
         updateState($.bbq.getState());
 
         urls = config.urls;
+
+        mapTheme = config.mapTheme;
 
         initializeTabs();
 
@@ -426,6 +430,10 @@ var RegionWidget = function (config) {
 
         getUrls: function() {
             return urls;
+        },
+
+        getMapTheme: function() {
+            return mapTheme;
         },
 
         getCurrentState: function() {
@@ -765,6 +773,15 @@ var RegionMap = function (config) {
                 }
             });
         }
+
+        var urls = regionWidget.getUrls();
+        var mapTheme = regionWidget.getMapTheme();
+        if (mapTheme.mapEnvOptions.indexOf("colormode:") >= 0) {
+        //if( mapTheme.mapEnvLegend != '') {
+            addMapLegend(true);
+        } else {
+            $('#mapLegend').hide();
+        }
     };
 
     /**
@@ -897,8 +914,91 @@ var RegionMap = function (config) {
         ];
 
         //Add query string params to custom params
+        var searchParam = getSearchParam();
+
+        var pairs = searchParam.substring(1).split('&');
+        for (var j = 0; j < pairs.length; j++) {
+            customParams.push(pairs[j]);
+        }
+        overlays[1] = new WMSTileLayer("Occurrences",
+            urlConcat(urls.biocacheServiceUrl, "occurrences/wms?"), customParams, wmsTileLoaded, getOccurrenceOpacity());
+
+        map.overlayMapTypes.setAt(1, $('#toggleOccurrences').is(':checked') ? overlays[1] : null);
+    };
+
+    var drawRecordsOverlay2 = function() {
+        var currentState = regionWidget.getCurrentState();
+        var urls = regionWidget.getUrls();
+        var mapTheme = regionWidget.getMapTheme();
+
+        var url = urls.biocacheServiceUrl + "/mapping/wms/reflect?",
+            query = region.buildBiocacheQuery(currentState.q, 0, true);
+        var prms = [
+            "FORMAT=" + overlayFormat,
+            "LAYERS=ALA%3Aoccurrences",
+            "STYLES=",
+            "BGCOLOR=0xFFFFFF",
+            'q=' + query.q,
+            "fq=geospatial_kosher:true",
+            "fq=rank:(species OR subspecies)",
+            'CQL_FILTER=',
+            "symsize=3",
+            "ENV=" + mapTheme.mapEnvOptions + ";opacity:" + getOccurrenceOpacity(), // custom theme
+            "EXCEPTIONS=application-vnd.ogc.se_inimage"
+        ];
+        //alert(prms);
+        if (query.fq) {
+            prms.push("fq=" + query.fq);
+        }
+
+        //console.log(currentState);
+        var fqParam = "";
+        if ($("#taxonomyTab").hasClass('active')) {
+            // show records based on taxonomy chart
+            if (taxonomyChart.rank && taxonomyChart.name) {
+                prms.push("fq=" + encodeURI(taxonomyChart.rank + ":" + taxonomyChart.name));
+            }
+        }
+        else {
+            // show records based on taxa box
+            if (currentState.guid) {
+                prms.push("fq=taxon_concept_lsid:" + encodeURI(currentState.guid));
+            }
+            else if (currentState.group != "ALL_SPECIES") {
+                if (currentState.subgroup) {
+                    prms.push("fq=species_subgroup:" + encodeURI('"' + currentState.subgroup + '"'));
+                } else {
+                    prms.push("fq=species_group:" + encodeURI('"' + currentState.group + '"'));
+                }
+            }
+        }
+
+        if(currentState.qc){
+            prms.push("qc=" + currentState.qc)
+        }
+
+        if(currentState.showHubData){
+            prms.push("fq=" + currentState.hubFilter)
+        }
+
+        overlays[1] = new WMSTileLayer("Occurrences (by reflect service)", url, prms, wmsTileLoaded, getOccurrenceOpacity());
+
+        map.overlayMapTypes.setAt(1, $('#toggleOccurrences').is(':checked') ? overlays[1] : null);
+
+        var mapTheme = regionWidget.getMapTheme();
+        console.log(mapTheme);
+        if (mapTheme.mapEnvOptions.indexOf("colormode:") >= 0) {
+            addMapLegend(false);
+        } else {
+            $('#mapLegend').hide();
+        }
+
+    };
+
+    var getSearchParam = function() {
+        var currentState = regionWidget.getCurrentState();
         var query = region.buildBiocacheQuery(currentState.q, 0, true);
-        var searchParam = encodeURI("?q=" + decodeURI(query.q) + "&fq=" + query.fq + "&fq=geospatial_kosher:true");
+        var searchParam = /* encodeURI( */"?q=" + decodeURI(query.q) + "&fq=" + (query.fq === undefined? "" : query.fq) + "&fq=geospatial_kosher:true" /* ) */;
 
         var fqParam = "";
         if ($("#taxonomyTab").hasClass('active')) {
@@ -930,73 +1030,57 @@ var RegionMap = function (config) {
         if(currentState.showHubData){
             searchParam += "&fq=" + currentState.hubFilter
         }
+        return searchParam;
+    }
 
-        var pairs = searchParam.substring(1).split('&');
-        for (var j = 0; j < pairs.length; j++) {
-            customParams.push(pairs[j]);
-        }
-        overlays[1] = new WMSTileLayer("Occurrences",
-            urlConcat(urls.biocacheServiceUrl, "occurrences/wms?"), customParams, wmsTileLoaded, getOccurrenceOpacity());
+    var addMapLegend = function (addToMap) {
 
-        map.overlayMapTypes.setAt(1, $('#toggleOccurrences').is(':checked') ? overlays[1] : null);
-    };
-
-    var drawRecordsOverlay2 = function() {
-        var currentState = regionWidget.getCurrentState();
-        var urls = regionWidget.getUrls();
-
-        var url = urls.biocacheServiceUrl + "/mapping/wms/reflect?",
-            query = region.buildBiocacheQuery(currentState.q, 0, true);
-        var prms = [
-            "FORMAT=" + overlayFormat,
-            "LAYERS=ALA%3Aoccurrences",
-            "STYLES=",
-            "BGCOLOR=0xFFFFFF",
-            'q=' + query.q,
-            "fq=geospatial_kosher:true",
-            "fq=rank:(species OR subspecies)",
-            'CQL_FILTER=',
-            "symsize=3",
-            "ENV=color:FF0000;name:circle;size:3;opacity:" + getOccurrenceOpacity(),
-            "EXCEPTIONS=application-vnd.ogc.se_inimage"
-        ];
-
-        if (query.fq) {
-            prms.push("fq=" + query.fq);
-        }
-
-        var fqParam = "";
-        if ($("#taxonomyTab").hasClass('active')) {
-            // show records based on taxonomy chart
-            if (taxonomyChart.rank && taxonomyChart.name) {
-                prms.push("fq=" + encodeURI(taxonomyChart.rank + ":" + taxonomyChart.name));
+        var mapTheme = regionWidget.getMapTheme();
+        console.log(mapTheme);
+        var mapOptArr = mapTheme.mapEnvOptions.split(";");
+        var legendQ = '';
+        for (var i = 0; i < mapOptArr.length; i++) {
+            if (mapOptArr[i].indexOf('colormode:') == 0) {
+                legendQ = mapOptArr[i].substring('colormode:'.length);
+                break;
             }
         }
-        else {
-            // show records based on taxa box
-            if (currentState.guid) {
-                prms.push("fq=taxon_concept_lsid:" + encodeURI(currentState.guid));
-            }
-            else if (currentState.group != "ALL_SPECIES") {
-                if (currentState.subgroup) {
-                    prms.push("fq=species_subgroup:" + encodeURI('"' + currentState.subgroup + '"'));
-                } else {
-                    prms.push("fq=species_group:" + encodeURI('"' + currentState.group + '"'));
+        if (legendQ != '') {
+            $('.mapLegendTable').html('<tr><td>Loading legend....</td></tr>');
+
+            var urls = regionWidget.getUrls();
+
+            var searchParam = getSearchParam();
+
+            var legendUrl = urls.biocacheWebappUrl + "/occurrence/legend" + searchParam + "&cm=" + legendQ + "&type=application/json";
+
+            //console.log(legendUrl);
+            $.ajax({
+                url: legendUrl,
+                success: function (data) {
+                    $('#mapLegendTable').html('');
+
+                    $("#mapLegendTable")
+                        .append($('<tr>')
+                            .append($('<td>')
+                                .addClass('legendTitle')
+                                .html(mapTheme.mapEnvLegendTitle + ":")
+                            )
+                        );
+
+                    $.each(data, function (index, legendDef) {
+                        var legItemName = legendDef.name ? legendDef.name : 'Not specified';
+                        addLegendItem(legItemName, legendDef.red, legendDef.green, legendDef.blue, legendDef);
+                    });
+
+                    if (addToMap) {
+                        var legend = document.getElementById('mapLegend');
+                        map.controls[google.maps.ControlPosition.LEFT_TOP].push(legend);
+                    }
                 }
-            }
+            });
         }
-
-        if(currentState.qc){
-            prms.push("qc=" + currentState.qc)
-        }
-
-        if(currentState.showHubData){
-            prms.push("fq=" + currentState.hubFilter)
-        }
-
-        overlays[1] = new WMSTileLayer("Occurrences (by reflect service)", url, prms, wmsTileLoaded, 0.8);
-
-        map.overlayMapTypes.setAt(1, $('#toggleOccurrences').is(':checked') ? overlays[1] : null);
+        return;
     };
 
     /**
@@ -1042,6 +1126,37 @@ var RegionMap = function (config) {
         }
     };
 
+
     init(config);
     return _public;
 };
+
+function addLegendItem(name, red, green, blue, data){
+    var isoDateRegEx = /^(\d{4})-\d{2}-\d{2}T.*/; // e.g. 2001-02-31T12:00:00Z with year capture
+    if (name.search(isoDateRegEx) > -1) {
+        // convert full ISO date to YYYY-MM-DD format
+        name = name.replace(isoDateRegEx, "$1");
+    }
+    var startOfRange = name.indexOf(":[");
+    if (startOfRange != -1) {
+        var nameVal = name.substring(startOfRange+1).replace("["," ").replace("]"," ").replace(" TO "," to ").trim();
+    } else {
+        var nameVal = name;
+    }
+    var legendText = (nameVal);
+
+
+    $("#mapLegendTable")
+        .append($('<tr>')
+            .append($('<td>')
+                .append($('<i>')
+                    .addClass('legendColour')
+                    .attr('style', "background-color:rgb("+ red +","+ green +","+ blue + ");")
+                )
+                .append($('<span>')
+                    .addClass('legendItemName')
+                    .html(legendText)
+                )
+            )
+        );
+}

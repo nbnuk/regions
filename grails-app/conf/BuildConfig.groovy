@@ -35,7 +35,7 @@ grails.project.dependency.resolution = {
         build ":release:3.0.1"
         build ":rest-client-builder:2.0.3"
 
-        compile ":ajaxanywhere:1.0-SNAPSHOT"
+        compile ":ajaxanywhere:1.0" //was -SNAPSHOT
         runtime (":ala-bootstrap2:2.4.5")
 
         if (Environment.current == Environment.PRODUCTION) {
