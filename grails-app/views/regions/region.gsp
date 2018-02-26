@@ -321,7 +321,8 @@
             </g:if>
             ,mapTheme: {
                 mapEnvOptions: "${grailsApplication.config.map?.env?.options ?: 'color:' + (grailsApplication.config.map?.records?.colour ?: 'e6704c') + ';name:circle;size:4'}",
-                mapEnvLegendTitle: "${grailsApplication.config.map?.env?.legendtitle ?: ''}"
+                mapEnvLegendTitle: "${grailsApplication.config.map?.env?.legendtitle ?: ''}",
+                mapEnvLegendHideMax: "${grailsApplication.config.map.env?.legendhidemaxrange?:false}",
             }
         });
 
