@@ -319,10 +319,35 @@
                 ,hubFilter:"${URLEncoder.encode(grailsApplication.config.hub.hubFilter , "UTF-8")}"
                 ,showHubData: ${hubState}
             </g:if>
+    %{-- if specific theming is defined for the map, mapTheme will contain the legend title, map ENV options and
+         optionally a flag to hide the upper range of biocache-generated legend labels.
+         Whether the biocache legend or a custom legend will be used is based on whether the ENV options contain colormode.
+         If colormode is defined then the legend is drawn from biocache (with arbitrary colours).
+         Alternatively, the details of a custom legend are defined in the mapLayers variable, comprising an equal number of
+         pipe-delimited entries for each layer FQ, label and colour.
+Example .properties file entries:
+
+map.env.legendtitle=Licence
+
+#if using automatic legend from biocache then add colormode and legendhidemaxrange option
+#map.env.options=colormode:license,CC-BY,CC-BY-NC,CC0,OGC;name:circle;size:4
+#map.env.legendhidemaxrange=true
+
+#if using custom legend add layerfq options, labels and colours (same number of each and | delimited)
+#map.env.options=name:circle;size:4
+#map.layers.fqs=license:("CC-BY" OR "CC-BY-NC")|license:CC0
+#map.layers.labels=CC-BY*|CC0
+#map.layers.colours=E6704C|FFC0CB
+        --}%
             ,mapTheme: {
                 mapEnvOptions: "${grailsApplication.config.map?.env?.options ?: 'color:' + (grailsApplication.config.map?.records?.colour ?: 'e6704c') + ';name:circle;size:4'}",
                 mapEnvLegendTitle: "${grailsApplication.config.map?.env?.legendtitle ?: ''}",
-                mapEnvLegendHideMax: "${grailsApplication.config.map.env?.legendhidemaxrange?:false}",
+                mapEnvLegendHideMax: "${grailsApplication.config.map.env?.legendhidemaxrange?:false}"
+            }
+            ,mapLayers: {
+                mapLayersFqs: "${grailsApplication.config.map?.layers?.fqs ?: ''}",
+                mapLayersLabels: "${grailsApplication.config.map?.layers?.labels ?: ''}",
+                mapLayersColours: "${grailsApplication.config.map?.layers?.colours ?: ''}"
             }
         });
 

@@ -123,6 +123,7 @@ var RegionWidget = function (config) {
     var urls = {};
 
     var mapTheme = {};
+    var mapLayers = {};
 
     var redirectDownloads = false;
 
@@ -154,6 +155,7 @@ var RegionWidget = function (config) {
         urls = config.urls;
 
         mapTheme = config.mapTheme;
+        mapLayers = config.mapLayers;
 
         initializeTabs();
 
@@ -434,6 +436,9 @@ var RegionWidget = function (config) {
 
         getMapTheme: function() {
             return mapTheme;
+        },
+        getMapLayers: function() {
+            return mapLayers;
         },
 
         getCurrentState: function() {
@@ -776,7 +781,8 @@ var RegionMap = function (config) {
 
         var urls = regionWidget.getUrls();
         var mapTheme = regionWidget.getMapTheme();
-        if (mapTheme.mapEnvOptions.indexOf("colormode:") >= 0) {
+        var mapLayers = regionWidget.getMapLayers();
+        if (mapTheme.mapEnvOptions.indexOf("colormode:") >= 0 || mapLayers.mapLayersLabels != '') { //either biocache-generated layers via colormode or custom  via mapLayers
         //if( mapTheme.mapEnvLegend != '') {
             addMapLegend(true);
         } else {
@@ -930,6 +936,7 @@ var RegionMap = function (config) {
         var currentState = regionWidget.getCurrentState();
         var urls = regionWidget.getUrls();
         var mapTheme = regionWidget.getMapTheme();
+        var mapLayers = regionWidget.getMapLayers();
 
         var url = urls.biocacheServiceUrl + "/mapping/wms/reflect?",
             query = region.buildBiocacheQuery(currentState.q, 0, true);
@@ -943,10 +950,8 @@ var RegionMap = function (config) {
             "fq=rank:(species OR subspecies)",
             'CQL_FILTER=',
             "symsize=3",
-            "ENV=" + mapTheme.mapEnvOptions + ";opacity:" + getOccurrenceOpacity(), // custom theme
             "EXCEPTIONS=application-vnd.ogc.se_inimage"
         ];
-        //alert(prms);
         if (query.fq) {
             prms.push("fq=" + query.fq);
         }
@@ -981,13 +986,26 @@ var RegionMap = function (config) {
             prms.push("fq=" + currentState.hubFilter)
         }
 
-        overlays[1] = new WMSTileLayer("Occurrences (by reflect service)", url, prms, wmsTileLoaded, getOccurrenceOpacity());
-
-        map.overlayMapTypes.setAt(1, $('#toggleOccurrences').is(':checked') ? overlays[1] : null);
+        if (mapLayers.mapLayersFqs != '') { //additional FQ criteria for each map layer
+            fqsArr = mapLayers.mapLayersFqs.split("|");
+            coloursArr = mapLayers.mapLayersColours.split("|");
+            var prmsLayer = [];
+            for (i = 0; i < fqsArr.length; i++) {
+                prmsLayer[i] = prms.slice();
+                prmsLayer[i].push("ENV=" + mapTheme.mapEnvOptions + ";opacity:" + getOccurrenceOpacity() + ";color:" + coloursArr[i]);
+                prmsLayer[i].push("fq=" + fqsArr[i]);
+                overlays[i+1] = new WMSTileLayer("Occurrences (by reflect service)", url, prmsLayer[i], wmsTileLoaded, getOccurrenceOpacity());
+                map.overlayMapTypes.setAt(i+1, $('#toggleOccurrences').is(':checked') ? overlays[i+1] : null);
+            }
+        } else { //normal one-layer map, potentially with biocache generated theme
+            prms.push("ENV=" + mapTheme.mapEnvOptions + ";opacity:" + getOccurrenceOpacity()); // custom theme
+            overlays[1] = new WMSTileLayer("Occurrences (by reflect service)", url, prms, wmsTileLoaded, getOccurrenceOpacity());
+            map.overlayMapTypes.setAt(1, $('#toggleOccurrences').is(':checked') ? overlays[1] : null);
+        }
 
         var mapTheme = regionWidget.getMapTheme();
-        console.log(mapTheme);
-        if (mapTheme.mapEnvOptions.indexOf("colormode:") >= 0) {
+        var mapLayers = regionWidget.getMapLayers();
+        if (mapTheme.mapEnvOptions.indexOf("colormode:") >= 0 || mapLayers.mapLayersLabels != '') {
             addMapLegend(false);
         } else {
             $('#mapLegend').hide();
@@ -1004,7 +1022,7 @@ var RegionMap = function (config) {
         if ($("#taxonomyTab").hasClass('active')) {
             // show records based on taxonomy chart
             if (taxonomyChart.rank && taxonomyChart.name) {
-                fqParam = "&fq=" + taxonomyChart.rank + ":" + taxonomyChart.name;
+                fqParam = '&fq=' + taxonomyChart.rank + ':"' + taxonomyChart.name + "'";
             }
         }
         else {
@@ -1014,9 +1032,9 @@ var RegionMap = function (config) {
             }
             else if (currentState.group != "ALL_SPECIES") {
                 if (currentState.subgroup) {
-                    fqParam = "&fq=species_subgroup:" + currentState.subgroup;
+                    fqParam = '&fq=species_subgroup:"' + currentState.subgroup + '"';
                 } else {
-                    fqParam = "&fq=species_group:" + currentState.group;
+                    fqParam = '&fq=species_group:"' + currentState.group + '"';
                 }
             }
         }
@@ -1028,7 +1046,7 @@ var RegionMap = function (config) {
         }
 
         if(currentState.showHubData){
-            searchParam += "&fq=" + currentState.hubFilter
+            searchParam += "&fq=" + currentState.hubFilter;
         }
         return searchParam;
     }
@@ -1036,7 +1054,8 @@ var RegionMap = function (config) {
     var addMapLegend = function (addToMap) {
 
         var mapTheme = regionWidget.getMapTheme();
-        console.log(mapTheme);
+        var mapLayers = regionWidget.getMapLayers();
+        //console.log(mapTheme);
         var mapOptArr = mapTheme.mapEnvOptions.split(";");
         var legendQ = '';
         for (var i = 0; i < mapOptArr.length; i++) {
@@ -1045,40 +1064,61 @@ var RegionMap = function (config) {
                 break;
             }
         }
+        //console.log(legendQ);
+
+        $('#mapLegendTable').html('');
+        $("#mapLegendTable")
+            .append($('<tr>')
+                .append($('<td>')
+                    .addClass('legendTitle')
+                    .html(mapTheme.mapEnvLegendTitle + ":")
+                )
+            );
+
         if (legendQ != '') {
-            $('.mapLegendTable').html('<tr><td>Loading legend....</td></tr>');
+            //use legend from biocache service
+            //$('.mapLegendTable').html('<tr><td>Loading legend....</td></tr>');
 
             var urls = regionWidget.getUrls();
 
             var searchParam = getSearchParam();
 
             var legendUrl = urls.biocacheWebappUrl + "/occurrence/legend" + searchParam + "&cm=" + legendQ + "&type=application/json";
+            //var legendUrl = "https://records-ws.nbnatlas.org/mapping/legend" + searchParam + "&cm=" + legendQ + "&type=application/json";
 
-            //console.log(legendUrl);
+            /* $.getJSON("https://api.gitv hub.com/users/jeresig?callback=?",function(json){
+                console.log('xxxxxx' + json);
+            });
+            $.getJSON("https://records-ws.nbnatlas.org/occurrences/search?pageSize=0&flimit=1&callback=?",function(json){
+                console.log('xxxxxxx' + json);
+            }); */
+
+            console.log("legend: " + legendUrl);
             $.ajax({
                 url: legendUrl,
+                jsonp: "callback",
+                dataType: "json", //jsonp?
                 success: function (data) {
-                    $('#mapLegendTable').html('');
-
-                    $("#mapLegendTable")
-                        .append($('<tr>')
-                            .append($('<td>')
-                                .addClass('legendTitle')
-                                .html(mapTheme.mapEnvLegendTitle + ":")
-                            )
-                        );
-
                     $.each(data, function (index, legendDef) {
                         var legItemName = legendDef.name ? legendDef.name : 'Not specified';
-                        addLegendItem(legItemName, legendDef.red, legendDef.green, legendDef.blue, legendDef, mapTheme.mapEnvLegendHideMax);
+                        console.log(legendDef);
+                        addLegendItem(legItemName, legendDef.red, legendDef.green, legendDef.blue, '', mapTheme.mapEnvLegendHideMax);
                     });
 
-                    if (addToMap) {
-                        var legend = document.getElementById('mapLegend');
-                        map.controls[google.maps.ControlPosition.LEFT_TOP].push(legend);
-                    }
+
                 }
             });
+        } else if (mapLayers.mapLayersLabels != '') {
+            //use predefined legend entries and colours
+            var mapLabelsArr = mapLayers.mapLayersLabels.split("|");
+            var mapColoursArr = mapLayers.mapLayersColours.split("|");
+            for (var i = 0; i < mapLabelsArr.length; i++) {
+                addLegendItem(mapLabelsArr[i], 0, 0, 0, mapColoursArr[i],false); //use rgbhex and full label provided
+            }
+        }
+        if (addToMap) {
+            var legend = document.getElementById('mapLegend');
+            map.controls[google.maps.ControlPosition.LEFT_TOP].push(legend);
         }
         return;
     };
@@ -1131,8 +1171,9 @@ var RegionMap = function (config) {
     return _public;
 };
 
-function addLegendItem(name, red, green, blue, data, hiderangemax){
+function addLegendItem(name, red, green, blue, rgbhex, hiderangemax){
     var isoDateRegEx = /^(\d{4})-\d{2}-\d{2}T.*/; // e.g. 2001-02-31T12:00:00Z with year capture
+
     if (name.search(isoDateRegEx) > -1) {
         // convert full ISO date to YYYY-MM-DD format
         name = name.replace(isoDateRegEx, "$1");
@@ -1146,13 +1187,12 @@ function addLegendItem(name, red, green, blue, data, hiderangemax){
     }
     var legendText = (nameVal);
 
-
     $("#mapLegendTable")
         .append($('<tr>')
             .append($('<td>')
                 .append($('<i>')
                     .addClass('legendColour')
-                    .attr('style', "background-color:rgb("+ red +","+ green +","+ blue + ");")
+                    .attr('style', "background-color:" + (rgbhex!=''? "#" + rgbhex : "rgb("+ red +","+ green +","+ blue + ")") + ";")
                 )
                 .append($('<span>')
                     .addClass('legendItemName')
