@@ -1076,28 +1076,18 @@ var RegionMap = function (config) {
             );
 
         if (legendQ != '') {
-            //use legend from biocache service
-            //$('.mapLegendTable').html('<tr><td>Loading legend....</td></tr>');
-
             var urls = regionWidget.getUrls();
 
             var searchParam = getSearchParam();
 
-            var legendUrl = urls.biocacheWebappUrl + "/occurrence/legend" + searchParam + "&cm=" + legendQ + "&type=application/json";
-            //var legendUrl = "https://records-ws.nbnatlas.org/mapping/legend" + searchParam + "&cm=" + legendQ + "&type=application/json";
+            var legendUrl = "http://localhost:8080/regions" + "/proxy?format=json&url=" + urls.biocacheWebappUrl + "/occurrence/legend" + encodeURIComponent(searchParam.trim()) + "%26cm=" + legendQ + "%26type=application/json";
+            //note, need to add biocacheWebappUrl to config allowedHosts to allow proxy to work
 
-            /* $.getJSON("https://api.gitv hub.com/users/jeresig?callback=?",function(json){
-                console.log('xxxxxx' + json);
-            });
-            $.getJSON("https://records-ws.nbnatlas.org/occurrences/search?pageSize=0&flimit=1&callback=?",function(json){
-                console.log('xxxxxxx' + json);
-            }); */
-
-            console.log("legend: " + legendUrl);
+            //console.log("legend: " + legendUrl);
             $.ajax({
                 url: legendUrl,
                 jsonp: "callback",
-                dataType: "json", //jsonp?
+                dataType: "json",
                 success: function (data) {
                     $.each(data, function (index, legendDef) {
                         var legItemName = legendDef.name ? legendDef.name : 'Not specified';
