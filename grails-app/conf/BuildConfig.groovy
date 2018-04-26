@@ -36,7 +36,10 @@ grails.project.dependency.resolution = {
         build ":rest-client-builder:2.0.3"
 
         compile ":ajaxanywhere:1.0" //was -SNAPSHOT
+        //compile ":resources:1.2.14"  // RR added
         runtime (":ala-bootstrap2:2.4.5")
+        //runtime ":ala-bootstrap2:2.7.0" // RR was 2.4.5
+
 
         if (Environment.current == Environment.PRODUCTION) {
             runtime ":zipped-resources:1.0.1"
