@@ -827,7 +827,9 @@ var RegionMap = function (config) {
 
         // layer toggling
         $("#toggleOccurrences").click(function () {
-            toggleOverlay(1, this.checked);
+            for (var i = 1; i < map.overlayMapTypes.length; i++) {
+                toggleOverlay(i, this.checked);
+            }
         });
         $("#toggleRegion").click(function () {
             toggleOverlay(0, this.checked);
