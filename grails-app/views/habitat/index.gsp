@@ -228,14 +228,18 @@
             $this.find('.subTree').show();
 
             $('#viewRecordsLink').attr('href', recordsUrl + $this.data('id'));
-            $('#viewRecordsLink').show();
+            // RR enable once layer is fixed for Scotland
+            // $('#viewRecordsLink').show();
 
             $('#click-info').hide();
 
             //set title
             $('#selected-habitat').html($this.data("name"))
             $('#selected-habitat').attr('href', regionUrl + '/' +  $this.data("pid"));
-            $('#selected-habitat').show();
+            // RR enable once layer is fixed for Scotland. at the moment it's making calls like
+            // https://layers.nbnatlas.org/ws/object/1000:5
+            // which are invalid. Need to translate tree position into valid pid
+            //$('#selected-habitat').show();
 
             $.each(HABITAT_MAP.activeLayers, function(index, layer){
                 HABITAT_MAP.map.removeLayer(layer);

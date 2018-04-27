@@ -670,7 +670,7 @@ class MetadataService {
     }
 
     def getObjectByPid(pid){
-        def url = grailsApplication.config.layersService.baseURL + '/object/' + pid
+        def url = grailsApplication.config.layersService.baseURL + '/object/' + pid // TODO: this is broken
         def js = new JsonSlurper()
         js.parseText(new URL(url).text)
     }
