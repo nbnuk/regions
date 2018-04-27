@@ -311,7 +311,8 @@
             },
             username: '${rg.loggedInUsername()}',
             q: '${region.q}',
-            redirectDownloads: ${grailsApplication.config.redirectDownloads.toBoolean()}
+            redirectDownloads: ${grailsApplication.config.redirectDownloads.toBoolean()},
+            server: '${grailsApplication.config.grails.serverURL}'
             <g:if test="${enableQueryContext}">
                 ,qc:"${URLEncoder.encode(grailsApplication.config.biocache.queryContext, "UTF-8")}"
             </g:if>

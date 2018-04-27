@@ -149,6 +149,8 @@ var RegionWidget = function (config) {
 
         state.redirectDownloads = config.redirectDownloads;
 
+        state.server = config.server;
+
         // Check previous existing state
         updateState($.bbq.getState());
 
@@ -1080,7 +1082,7 @@ var RegionMap = function (config) {
 
             var searchParam = getSearchParam();
 
-            var legendUrl = "http://localhost:8080/regions" + "/proxy?format=json&url=" + urls.biocacheWebappUrl + "/occurrence/legend" + encodeURIComponent(searchParam.trim()) + "%26cm=" + legendQ + "%26type=application/json";
+            var legendUrl = regionWidget.getCurrentState().server + "/proxy?format=json&url=" + urls.biocacheWebappUrl + "/occurrence/legend" + encodeURIComponent(searchParam.trim()) + "%26cm=" + legendQ + "%26type=application/json";
             //note, need to add biocacheWebappUrl to config allowedHosts to allow proxy to work
 
             //console.log("legend: " + legendUrl);
