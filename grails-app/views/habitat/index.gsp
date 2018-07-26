@@ -238,7 +238,7 @@
             $('#selected-habitat').attr('href', regionUrl + '/' +  $this.data("pid"));
             // RR enable once layer is fixed for Scotland. at the moment it's making calls like
             // https://layers.nbnatlas.org/ws/object/1000:5
-            // which are invalid. Need to translate tree position into valid pid
+            // which are invalid. Need to put valid pids in habitats config file. Looks like each tree level would need to be a separate layer to allow for nesting of hierarchy
             //$('#selected-habitat').show();
 
             $.each(HABITAT_MAP.activeLayers, function(index, layer){

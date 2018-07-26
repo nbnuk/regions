@@ -132,14 +132,26 @@ class MetadataService {
      */
     List getGroups(String regionFid, String regionType, String regionName, String regionPid, Boolean showHubData = false) {
         def responseGroups = new RESTClient("${BIOCACHE_SERVICE_URL}/explore/hierarchy").get([headers: userAgent]).data
+        //records explore your area uses /explore/groups.json?facets=species_groups&fq=xxx&lat&lon etc
+
+        List responseGroupsDistinct = []
+        List subgroupsDistinct = []
+
         Map subgroupsWithRecords = getSubgroupsWithRecords(regionFid, regionType, regionName, regionPid, showHubData)
 
         List groups = [] << [name: 'ALL_SPECIES', commonName: 'ALL_SPECIES']
         responseGroups.each {group ->
-            groups << [name: group.speciesGroup, commonName: group.speciesGroup]
-            group.taxa.each {subgroup ->
-                if (subgroupsWithRecords[subgroup.common]) {
-                    groups << [name: subgroup.name, commonName: subgroup.common, parent: group.speciesGroup]
+            if (!responseGroupsDistinct.contains(group.speciesGroup)) {
+                groups << [name: group.speciesGroup, commonName: group.speciesGroup]
+                responseGroupsDistinct << group.speciesGroup
+            }
+
+            group.taxa.each { subgroup ->
+                if (!subgroupsDistinct.contains([group.speciesGroup, subgroup.common])) {
+                    subgroupsDistinct << [group.speciesGroup, subgroup.common]
+                    if (subgroupsWithRecords[subgroup.common]) {
+                        groups << [name: subgroup.name, commonName: subgroup.common, parent: group.speciesGroup] /* arbitrary subgroup.name */
+                    }
                 }
             }
         }
@@ -670,7 +682,7 @@ class MetadataService {
     }
 
     def getObjectByPid(pid){
-        def url = grailsApplication.config.layersService.baseURL + '/object/' + pid // TODO: this is broken
+        def url = grailsApplication.config.layersService.baseURL + '/object/' + pid
         def js = new JsonSlurper()
         js.parseText(new URL(url).text)
     }

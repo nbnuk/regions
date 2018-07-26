@@ -74,7 +74,11 @@ class RegionsTagLib {
         SortedMap breadcrumbConfig = new TreeMap(grailsApplication.config.skin.breadcrumb ?: grailsApplication.config.breadcrumb.default)
 
         breadcrumbConfig.each { String level, Map config ->
-            out << """<li><a href='${homeURL+config.path}'>${config.title}</a> <span class="divider"><i class="fa fa-arrow-right"></i></span></li>"""
+            if (config.title != '') {
+                out << """<li><a href='${homeURL + config.path}'>${
+                    config.title
+                }</a> <span class="divider"><i class="fa fa-arrow-right"></i></span></li>"""
+            }
         }
 
         return out

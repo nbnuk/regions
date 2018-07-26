@@ -245,7 +245,7 @@ RegionSet.prototype = {
     },
     /* Draw the layer for this set (or sub-set) */
     drawLayer: function (colour, order) {
-        debugger;
+        //debugger;
         var redraw = false,
             layerParams,
             sld_body='<?xml version="1.0" encoding="UTF-8"?><StyledLayerDescriptor version="1.0.0" xmlns="http://www.opengis.net/sld"><NamedLayer><Name>ALA:LAYERNAME</Name><UserStyle><FeatureTypeStyle><Rule><Title>Polygon</Title><PolygonSymbolizer><Fill><CssParameter name="fill">COLOUR</CssParameter></Fill><Stroke><CssParameter name="stroke">#000000</CssParameter><CssParameter name="stroke-width">1</CssParameter></Stroke></PolygonSymbolizer></Rule></FeatureTypeStyle></UserStyle></NamedLayer></StyledLayerDescriptor>';
