@@ -189,6 +189,7 @@
                 </div>
             </div>
         </div>
+        <g:message code="map.note" />
     </div>
 </div>
 
