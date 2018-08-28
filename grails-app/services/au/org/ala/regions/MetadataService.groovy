@@ -382,7 +382,7 @@ class MetadataService {
     private Map buildCommonDownloadRecordsParams(String regionFid, String regionType, String regionName, String regionPid, String groupName = null, Boolean isSubgroup = false, String from = null, String to = null, Boolean showHubData = false) {
         Map params = [
                 q : buildRegionFacet(regionFid, regionType, regionName, regionPid),
-                fq: 'rank:(species OR subspecies)',
+                fq: (grailsApplication.config.filter?.taxa?: 'rank:(species OR subspecies)'),
         ]
 
         if (groupName && isSubgroup) {
@@ -448,7 +448,7 @@ class MetadataService {
                 pageSize : 0,
                 flimit: PAGE_SIZE,
                 foffset: Integer.parseInt(pageIndex) * Integer.parseInt(PAGE_SIZE),
-                fq: 'rank:(species OR subspecies)'
+                fq: (grailsApplication.config.filter?.taxa?: 'rank:(species OR subspecies)')
         ]
 
         if (groupName && isSubgroup) {

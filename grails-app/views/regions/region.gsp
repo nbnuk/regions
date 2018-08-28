@@ -321,6 +321,7 @@
                 ,hubFilter:"${URLEncoder.encode(grailsApplication.config.hub.hubFilter , "UTF-8")}"
                 ,showHubData: ${hubState}
             </g:if>
+            ,taxa_filter: "${grailsApplication.config.filter?.taxa?: 'rank:(species OR subspecies)'}"
     %{-- if specific theming is defined for the map, mapTheme will contain the legend title, map ENV options and
          optionally a flag to hide the upper range of biocache-generated legend labels.
          Whether the biocache legend or a custom legend will be used is based on whether the ENV options contain colormode.

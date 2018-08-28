@@ -117,7 +117,8 @@ var RegionWidget = function (config) {
         q: '',
         qc: '',
         hubFilter:'',
-        showHubData:false
+        showHubData:false,
+        taxa_filter: ''
     };
 
     var urls = {};
@@ -150,6 +151,8 @@ var RegionWidget = function (config) {
         state.redirectDownloads = config.redirectDownloads;
 
         state.server = config.server;
+
+        state.taxa_filter = config.taxa_filter;
 
         // Check previous existing state
         updateState($.bbq.getState());
@@ -208,7 +211,7 @@ var RegionWidget = function (config) {
             event.preventDefault();
             // check what group is active
             var url = urls.biocacheWebappUrl + '/occurrences/search?q=' + decodeURI(state.q) +
-                '&fq=rank:(species OR subspecies)';
+                '&fq=' + state.taxa_filter;
             if (!regionWidget.isDefaultFromYear() || !regionWidget.isDefaultToYear()) {
                 url += '&fq=' + region.buildTimeFacet();
             }
@@ -248,7 +251,7 @@ var RegionWidget = function (config) {
             var targetUri = "&targetUri=" + encodeURI(urls.regionsApp);
 
             // check what group is active
-            var url = "%3Fq%3D" + encodeURI(state.q) + encodeURI('&fq=rank:(species OR subspecies)');
+            var url = "%3Fq%3D" + encodeURI(state.q) + encodeURI('&fq=' + state.taxa_filter);
             if (!regionWidget.isDefaultFromYear() || !regionWidget.isDefaultToYear()) {
                 url += encodeURI('&fq=' + region.buildTimeFacet());
             }
@@ -951,7 +954,7 @@ var RegionMap = function (config) {
             "BGCOLOR=0xFFFFFF",
             'q=' + query.q,
             "fq=geospatial_kosher:true",
-            "fq=rank:(species OR subspecies)",
+            "fq=" + currentState.taxa_filter,
             'CQL_FILTER=',
             "symsize=3",
             "EXCEPTIONS=application-vnd.ogc.se_inimage"

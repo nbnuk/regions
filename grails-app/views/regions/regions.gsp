@@ -38,7 +38,7 @@
         Click the region button
         to explore occurrence records, images and documents associated with the region.
         </p>
-
+        <p><g:message code="map.note" /></p>
     </div>
 </div>
 
