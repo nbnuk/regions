@@ -231,7 +231,7 @@ var RegionWidget = function (config) {
             if(state.showHubData){
                 url += "&fq=" + state.hubFilter
             }
-
+            url += '&fq=' + '-occurrence_status:absent';
             document.location.href = url;
         });
     };
@@ -271,6 +271,8 @@ var RegionWidget = function (config) {
             if(state.showHubData){
                 url += encodeURI('&fq=') + state.hubFilter
             }
+
+            url += '&fq=' + '-occurrence_status:absent';
 
             document.location.href = baseUrl + url + targetUri ;
         });
@@ -955,6 +957,7 @@ var RegionMap = function (config) {
             'q=' + query.q,
             "fq=geospatial_kosher:true",
             "fq=" + currentState.taxa_filter,
+            "fq=-occurrence_status:absent",
             'CQL_FILTER=',
             "symsize=3",
             "EXCEPTIONS=application-vnd.ogc.se_inimage"
@@ -1023,7 +1026,7 @@ var RegionMap = function (config) {
     var getSearchParam = function() {
         var currentState = regionWidget.getCurrentState();
         var query = region.buildBiocacheQuery(currentState.q, 0, true);
-        var searchParam = /* encodeURI( */"?q=" + decodeURI(query.q) + "&fq=" + (query.fq === undefined? "" : query.fq) + "&fq=geospatial_kosher:true" /* ) */;
+        var searchParam = /* encodeURI( */"?q=" + decodeURI(query.q) + "&fq=" + (query.fq === undefined? "" : query.fq) + "&fq=geospatial_kosher:true&fq=-occurrence_status:absent" /* ) */;
 
         var fqParam = "";
         if ($("#taxonomyTab").hasClass('active')) {

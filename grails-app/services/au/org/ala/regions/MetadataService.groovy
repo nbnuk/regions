@@ -173,6 +173,7 @@ class MetadataService {
                     flimit: '-1',
                     pageSize: 0
             ]
+            params << [fq: "-occurrence_status:absent"]
 
             if(ENABLE_QUERY_CONTEXT){
                 params << [qc: QUERY_CONTEXT]
@@ -270,7 +271,7 @@ class MetadataService {
         if (isValidTimeRange(from, to)) {
             " AND ${buildTimeFacet(from, to)}"
         }
-
+        sb.append("&fq=-occurrence_status:absent")
         if(ENABLE_QUERY_CONTEXT){
             // when using qc, biocache search fails. AtlasOfLivingAustralia/biocache-hubs#176
             sb.append("&fq=${URLEncoder.encode(QUERY_CONTEXT, 'UTF-8')}")
@@ -279,6 +280,7 @@ class MetadataService {
         if(showHubData && ENABLE_HUB_DATA){
             sb.append("&fq=${URLEncoder.encode(HUB_FILTER, 'UTF-8')}")
         }
+        sb.append("&fq=-occurrence_status:absent")
 
         return sb.toString()
     }
@@ -460,6 +462,7 @@ class MetadataService {
         if (isValidTimeRange(from, to)) {
             params << [fq: params.fq + ' AND ' + buildTimeFacet(from, to)]
         }
+        params << [fq: params.fq + ' AND ' + "-occurrence_status:absent"]
 
         if(ENABLE_QUERY_CONTEXT){
             params << [qc: QUERY_CONTEXT]
