@@ -1,8 +1,7 @@
 language: groovy
 jdk:
-- oraclejdk7
+- openjdk7
 sudo: false
-dist: trusty
 branches:
   only:
   - master
