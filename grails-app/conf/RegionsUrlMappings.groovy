@@ -1,4 +1,4 @@
-class UrlMappings {
+class RegionsUrlMappings {
 
 	static mappings = {
 
@@ -40,7 +40,7 @@ class UrlMappings {
 			}
 		}
 
-		"/"(controller: 'regions')
+		"/"(controller: 'regions', action: 'regions')
 		"500"(view:'/error')
 	}
 }
