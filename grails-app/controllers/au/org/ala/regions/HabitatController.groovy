@@ -77,7 +77,6 @@ class HabitatController {
         http.request( POST, URLENC ) { req ->
             body = [
                 q: fqParam,
-                fq: "-occurrence_status:absent",
                 title: title
             ]
             response.success = { resp, json ->
