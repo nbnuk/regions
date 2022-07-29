@@ -118,15 +118,18 @@ var RegionWidget = function (config) {
         qc: '',
         hubFilter:'',
         showHubData:false,
+        //START NBN
         taxa_filter: ''
+        //END NBN
     };
 
     var urls = {};
 
+    //START NBN
     var mapTheme = {};
     var mapLayers = {};
-
     var redirectDownloads = false;
+    //END NBN
 
     /**
      * Constructor
@@ -148,19 +151,21 @@ var RegionWidget = function (config) {
         state.showHubData = config.showHubData || false;
         state.hubFilter = config.hubFilter || '';
 
+        //START NBN
         state.redirectDownloads = config.redirectDownloads;
-
         state.server = config.server;
-
         state.taxa_filter = config.taxa_filter;
+        //END NBN
 
         // Check previous existing state
         updateState($.bbq.getState());
 
         urls = config.urls;
 
+        //START NBN
         mapTheme = config.mapTheme;
         mapLayers = config.mapLayers;
+        //END NBN
 
         initializeTabs();
 
@@ -182,13 +187,17 @@ var RegionWidget = function (config) {
 
         initializeViewRecordsButton();
 
+        //START NBN
         if(state.redirectDownloads) {
             initializeDownloadRecordsButton();
         }
+        //END NBN
 
         // Initialize `nload records dialog
         $('#downloadRecordsModal').modal({show: false});
     };
+
+
 
     /**
      *
@@ -210,8 +219,15 @@ var RegionWidget = function (config) {
         $('#viewRecords').click(function(event) {
             event.preventDefault();
             // check what group is active
+
+            //START NBN
+            //CHANGED:
+            //var url = urls.biocacheWebappUrl + '/occurrences/search?q=' + decodeURI(state.q) +
+              //  '&fq=rank:(species OR subspecies)';
+            //TO
             var url = urls.biocacheWebappUrl + '/occurrences/search?q=' + decodeURI(state.q) +
                 '&fq=' + state.taxa_filter;
+            //END NBN
             if (!regionWidget.isDefaultFromYear() || !regionWidget.isDefaultToYear()) {
                 url += '&fq=' + region.buildTimeFacet();
             }
@@ -231,12 +247,14 @@ var RegionWidget = function (config) {
             if(state.showHubData){
                 url += "&fq=" + state.hubFilter
             }
-            url += '&fq=' + '-occurrence_status:absent';
+            //NBN LINE:
+            url += '&fq=' + '-occurrence_status:absent'; //NBN
             document.location.href = url;
         });
     };
 
-    /**
+
+    /**START NBN
      * Add a click event to download button.
      */
     var initializeDownloadRecordsButton = function() {
@@ -277,7 +295,7 @@ var RegionWidget = function (config) {
             document.location.href = baseUrl + url + targetUri ;
         });
     };
-
+//END NBN
 
     /**
      * Updates state with new values and preserve state for when reloading page
@@ -441,12 +459,14 @@ var RegionWidget = function (config) {
             return urls;
         },
 
+        //START NBN
         getMapTheme: function() {
             return mapTheme;
         },
         getMapLayers: function() {
             return mapLayers;
         },
+        //END NBN
 
         getCurrentState: function() {
             return state;
@@ -786,6 +806,7 @@ var RegionMap = function (config) {
             });
         }
 
+        //START NBN
         var urls = regionWidget.getUrls();
         var mapTheme = regionWidget.getMapTheme();
         var mapLayers = regionWidget.getMapLayers();
@@ -795,6 +816,7 @@ var RegionMap = function (config) {
         } else {
             $('#mapLegend').hide();
         }
+        //END NBN
     };
 
     /**
@@ -831,11 +853,21 @@ var RegionMap = function (config) {
         });
 
         // layer toggling
+        //START NBN.
+        //CHANGED:
+        // $("#toggleOccurrences").click(function () {
+        //     for (var i = 1; i < map.overlayMapTypes.length; i++) {
+        //         toggleOverlay(i, this.checked);
+        //     }
+        // });
+        //TO:
         $("#toggleOccurrences").click(function () {
             for (var i = 1; i < map.overlayMapTypes.length; i++) {
                 toggleOverlay(i, this.checked);
             }
         });
+        //END NBN
+
         $("#toggleRegion").click(function () {
             toggleOverlay(0, this.checked);
         });
@@ -929,7 +961,10 @@ var RegionMap = function (config) {
         ];
 
         //Add query string params to custom params
+        //START NBN
+        //consolidated buildding of searchParam into a method
         var searchParam = getSearchParam();
+        //END NBN
 
         var pairs = searchParam.substring(1).split('&');
         for (var j = 0; j < pairs.length; j++) {
@@ -944,8 +979,10 @@ var RegionMap = function (config) {
     var drawRecordsOverlay2 = function() {
         var currentState = regionWidget.getCurrentState();
         var urls = regionWidget.getUrls();
+        //START NBN
         var mapTheme = regionWidget.getMapTheme();
         var mapLayers = regionWidget.getMapLayers();
+        //END NBN
 
         var url = urls.biocacheServiceUrl + "/mapping/wms/reflect?",
             query = region.buildBiocacheQuery(currentState.q, 0, true);
@@ -956,8 +993,10 @@ var RegionMap = function (config) {
             "BGCOLOR=0xFFFFFF",
             'q=' + query.q,
             "fq=geospatial_kosher:true",
+            //START NBN
             "fq=" + currentState.taxa_filter,
             "fq=-occurrence_status:absent",
+            //END NBN
             'CQL_FILTER=',
             "symsize=3",
             "EXCEPTIONS=application-vnd.ogc.se_inimage"
@@ -966,7 +1005,6 @@ var RegionMap = function (config) {
             prms.push("fq=" + query.fq);
         }
 
-        //console.log(currentState);
         var fqParam = "";
         if ($("#taxonomyTab").hasClass('active')) {
             // show records based on taxonomy chart
@@ -996,6 +1034,11 @@ var RegionMap = function (config) {
             prms.push("fq=" + currentState.hubFilter)
         }
 
+        //START NBN
+        //CHANGED:
+        //overlays[1] = new WMSTileLayer("Occurrences (by reflect service)", url, prms, wmsTileLoaded, 0.8);
+        //map.overlayMapTypes.setAt(1, $('#toggleOccurrences').is(':checked') ? overlays[1] : null);
+        //TO:
         if (mapLayers.mapLayersFqs != '') { //additional FQ criteria for each map layer
             fqsArr = mapLayers.mapLayersFqs.split("|");
             coloursArr = mapLayers.mapLayersColours.split("|");
@@ -1020,9 +1063,10 @@ var RegionMap = function (config) {
         } else {
             $('#mapLegend').hide();
         }
-
+        //END NBN
     };
 
+    //START NBN - NEW METHOD
     var getSearchParam = function() {
         var currentState = regionWidget.getCurrentState();
         var query = region.buildBiocacheQuery(currentState.q, 0, true);
@@ -1060,7 +1104,9 @@ var RegionMap = function (config) {
         }
         return searchParam;
     }
+    //END NBN
 
+    //START NBN - NEW METHOD
     var addMapLegend = function (addToMap) {
 
         var mapTheme = regionWidget.getMapTheme();
@@ -1122,6 +1168,7 @@ var RegionMap = function (config) {
         }
         return;
     };
+    //END NBN
 
     /**
      * Show information about the current layer at the specified location.
@@ -1171,6 +1218,7 @@ var RegionMap = function (config) {
     return _public;
 };
 
+//START NBN - NEW METHOD
 function addLegendItem(name, red, green, blue, rgbhex, hiderangemax){
     var isoDateRegEx = /^(\d{4})-\d{2}-\d{2}T.*/; // e.g. 2001-02-31T12:00:00Z with year capture
 
@@ -1201,3 +1249,4 @@ function addLegendItem(name, red, green, blue, rgbhex, hiderangemax){
             )
         );
 }
+//END NBN
