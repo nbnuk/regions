@@ -3,13 +3,6 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="layout" content="${grailsApplication.config.skin.layout?:'main'}"/>
     <title>${region.name} | ${grailsApplication.config.orgNameLong}</title>
-    <link href="${grailsApplication.config.skin?.favicon?:'http://www.ala.org.au/wp-content/themes/ala2011/images/favicon.ico'}" rel="shortcut icon"  type="image/x-icon"/>
-    <g:if test="${grailsApplication.config.google.apikey}">
-        <script src="https://maps.googleapis.com/maps/api/js?key=${grailsApplication.config.google.apikey}" type="text/javascript"></script>
-    </g:if>
-    <g:else>
-        <script type="text/javascript" src="https://www.google.com/jsapi"></script>
-    </g:else>
     <r:require modules="region, bootstrapSwitch"/>
 </head>
 <body class="nav-locations regions">
@@ -124,16 +117,12 @@
                     </aa:zone>
                 </table>
                 <div class="text-center" id="exploreButtons">
-                    <a href="" id="viewRecords" class="btn"><i class="fa fa-share-square-o"></i> View records</a>
-                    <g:if test="true">
-                        <a href="" id="downloadRecords" class="btn"><i class="fa fa-download"></i> Download records</a>
-                    </g:if>
-                    <g:else>
+                    <a href="" id="viewRecords" class="btn"><i class="fa fa-share-square-o"></i> View Records</a>
+
                         <a href="${g.createLink(controller: 'region', action: 'showDownloadDialog')}"
                            aa-refresh-zones="dialogZone" aa-js-before="regionWidget.showDownloadDialog();" class="btn">
                             <i class="fa fa-download"></i> Download Records
                         </a>
-                    </g:else>
                 </div>
             </div>
             <div class="tab-pane" id="taxonomyTabContent">
@@ -167,7 +156,6 @@
         </div>
 
         <div id="region-map"></div>
-        <div id="mapLegend"><table id="mapLegendTable"></table></div>
 
         <div class="accordion" id="opacityControls">
             <div class="accordion-group">
@@ -190,7 +178,6 @@
                 </div>
             </div>
         </div>
-        <g:message code="map.note" />
     </div>
 </div>
 
@@ -312,9 +299,7 @@
                 spatialServiceUrl: "${grailsApplication.config.layersService.baseURL}/",
             },
             username: '${rg.loggedInUsername()}',
-            q: '${region.q}',
-            redirectDownloads: ${grailsApplication.config.redirectDownloads.toBoolean()},
-            server: '${grailsApplication.config.grails.serverURL}'
+            q: '${region.q}'
             <g:if test="${enableQueryContext}">
                 ,qc:"${URLEncoder.encode(grailsApplication.config.biocache.queryContext, "UTF-8")}"
             </g:if>
@@ -322,27 +307,10 @@
                 ,hubFilter:"${URLEncoder.encode(grailsApplication.config.hub.hubFilter , "UTF-8")}"
                 ,showHubData: ${hubState}
             </g:if>
+            //START NBN
+            ,redirectDownloads: ${grailsApplication.config.redirectDownloads.toBoolean()}
+            ,server: '${grailsApplication.config.grails.serverURL}'
             ,taxa_filter: "${grailsApplication.config.filter?.taxa?: 'rank:(species OR subspecies)'}"
-    %{-- if specific theming is defined for the map, mapTheme will contain the legend title, map ENV options and
-         optionally a flag to hide the upper range of biocache-generated legend labels.
-         Whether the biocache legend or a custom legend will be used is based on whether the ENV options contain colormode.
-         If colormode is defined then the legend is drawn from biocache (with arbitrary colours).
-         Alternatively, the details of a custom legend are defined in the mapLayers variable, comprising an equal number of
-         pipe-delimited entries for each layer FQ, label and colour.
-Example .properties file entries:
-
-map.env.legendtitle=Licence
-
-#if using automatic legend from biocache then add colormode and legendhidemaxrange option
-#map.env.options=colormode:license,CC-BY,CC-BY-NC,CC0,OGC;name:circle;size:4
-#map.env.legendhidemaxrange=true
-
-#if using custom legend add layerfq options, labels and colours (same number of each and | delimited)
-#map.env.options=name:circle;size:4
-#map.layers.fqs=license:("CC-BY" OR "CC-BY-NC")|license:CC0
-#map.layers.labels=CC-BY*|CC0
-#map.layers.colours=E6704C|FFC0CB
-        --}%
             ,mapTheme: {
                 mapEnvOptions: "${grailsApplication.config.map?.env?.options ?: 'color:' + (grailsApplication.config.map?.records?.colour ?: 'e6704c') + ';name:circle;size:4'}",
                 mapEnvLegendTitle: "${grailsApplication.config.map?.env?.legendtitle ?: ''}",
@@ -353,6 +321,7 @@ map.env.legendtitle=Licence
                 mapLayersLabels: "${grailsApplication.config.map?.layers?.labels ?: ''}",
                 mapLayersColours: "${grailsApplication.config.map?.layers?.colours ?: ''}"
             }
+            //END NBN
         });
 
         regionWidget.setMap(new RegionMap({
