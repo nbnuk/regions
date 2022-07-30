@@ -3,6 +3,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="layout" content="${grailsApplication.config.skin.layout?:'main'}"/>
     <title>${region.name} | ${grailsApplication.config.orgNameLong}</title>
+    <script src="https://maps.googleapis.com/maps/api/js?key=${grailsApplication.config.google.apikey}" type="text/javascript"></script>
     <r:require modules="region, bootstrapSwitch"/>
 </head>
 <body class="nav-locations regions">
