@@ -40,7 +40,7 @@ class RegionsUrlMappings {
 			}
 		}
 
-		"/"(controller: 'regions', action: 'regions')
+		"/"(controller: 'regions')
 		"500"(view:'/error')
 	}
 }
