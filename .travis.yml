@@ -1,14 +1,15 @@
 language: groovy
 jdk:
-- oraclejdk7
+- openjdk7
 sudo: false
+dist: trusty
 branches:
   only:
   - master
   - mdba
-
+  - FFTF
 before_install:
-- wget -q https://raw.githubusercontent.com/AtlasOfLivingAustralia/travis-build-configuration/master/ala_common.sh
+- wget -q https://raw.githubusercontent.com/nbnuk/travis-build-configuration/master/ala_common.sh
 - chmod +x ala_common.sh
 - source ./ala_common.sh
 
@@ -16,15 +17,7 @@ before_install:
 
 script:
 - ala_travis_grails_build
-
-# Build versions of regions with a different app.name.  This is so they can be deployed to the same server without config directories overlapping.
-- sed -i 's/app.name.*/app.name=regions-mdba/' ./application.properties
-- ala_travis_grails_build
-
-- sed -i 's/app.name.*/app.name=regions-ger/' ./application.properties
-- ala_travis_grails_build
-
 env:
   global:
-  - secure: RIhAEjfKDzlXrqrTAHgC7wg+FODTmEq2AyWVzYYt2P46YHHdClBbVf5o1MhfhbQfn2E7yTSOXnZaP4KGhhotMHsqSxg9Ys42Nq4KXp/CXYfVPbw0MneKIv8Y4pgkAOhz1wBcDSTSHgO9oijfANAnI37V391tqvSrL9NiJfbLZLA=
-  - secure: zAD+0aRjyOPpUWcY0g8Dl0Gy74mZd5JbCGpfz9DbkN1wZhLisrG5ooHkNVSxaVR/DJChLHBL61cpj5TNu5BZAyY850wbHyCHfJJF3cbqUJu8dBtvGLUJPEXdsPyHUxtNQEgk5DiNbeuUiGxwzkDcpiIRYGWcY3GSWF31SGnJyhU=
+  - secure: VqQyv9kUHuNp5Y4ZTuimbP/Xosqbxi2c/vJoUjAjaaJ5dVZde5jI2ZMkiQLS5+cHbd0b4f/7ne1XpFzgniweed53Hwaoiwb2OMD8WZJf5fRAWrxB22qIVOSiqbJjOA5dcupdtuX7qjIeVau+MeOcXydZMgb8auofCuyALZ+ehqoRbBxoQNdZ5mqrdRMldIUvHiF3T1sQYQpO5sSHlEuLJ1Lnsea6r56c3RwWwiqknbOpoMy3BOnL+CWz6O8QDWNmEa8L/SEDYXvPB/2M0qmy9BprPWZXQaNwddu0z+zENaEnSxy/EkwnGASphED04sM7yVV0eXVwiIOR5sPtyY6m9Cd9NUw8p2GC4Pa+bjCU9YGJkuPovCZw7bL7uQ9V/d4ZtYas/qUXCOgQbYjg82XwrKU6vyGIww/Opv5FisYCXJHwNKOnL2EOCzfaZZImLhcsV6YEpFb/wbFedj5w+XNkcKdiC9aPBe56r8gwvE6W+kux/duF94wl0rY3kdVMG5iqtY/qpopwTd9CFDi8TdmVyiFzTJpNNw+2q2Vad8ja+lLDGsJonDrIgqq6M6cc2zh7B4oiCttAOR66pw5xcPeOuYTz9m2gGMkjaqE2thMGNSpE9xLI+frzwqPvhzVopzsDKyvhhWBUpr0MAJPpabqlYEGTf4ccnCv6ts4ejHa9Wlc=
+  - secure: jWhfyrkCDpYrRijB97TgWkiEwzSMTLI2T7xdM5YdqZq332VkMqL9TRsqn83JPTKdf7G8FD/HtRGweFiNc71ZTVWjNOeMQP0QgrfIHrAbXJIQ57pxaLiiEvGMxDjHg6ZbdaghPE9vxmLbuls//Ajd8TH3W1VSWx6fdQao5fsa180VJR6eO8W5Gq5vy5FeXoQ1aJ8Yu+37PvCXqoK/5fe6FlqJZJU84MnRAV9lFLlnfT9nQzQ+o7yYDOI+D4Vqstt0v4FgJUAdjss8iChkKGsN9xHhcHunxFlr+zD+TNUneZdLXtFtLUFqis1i/tk79Q4HSW6eBiPmCE69X5Il4TpXvq5pK5JlHzeNROkyP9hwYmvPpr7ONBGtbs5H2wfaakvQG5gJBzuJeCVHNru3VGxxqHPhvx1Uj+5z6oBngLbj89xG/cx7SChir/gOdXIb6IksY4bED8XzoZOeF79ZzOrYKAZySFVOAH4J+k8KQQD88O95QxfYJlbt9mQGjI1Du4pId3FK66fE6xdFRe0XgQKBEEGFjUURQPE7FeCiY0WMLLx2zpPpIfz4ky10UTr8UHxtt6nB48Vxp6UJRtKNpBQ/MYJcYFp6E0v+2aeeMx9kfkfoWi/yTvZrTe/26f0erZDxly9NHBMhHbUs+fsGLzIjnCMvEzVJNYgxmeZuzExx7Xo=
