@@ -1,6 +1,7 @@
 class RegionsGrailsPlugin {
     // the plugin version
     def version = "2.5-NBN-PLUGIN-FFTF-0-0-SNAPSHOT"
+    def group = "au.org.ala"
     // the version or versions of Grails the plugin is designed for
     def grailsVersion = "2.3 > *"
     // resources that are excluded from plugin packaging
