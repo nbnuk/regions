@@ -210,10 +210,15 @@ var RegionWidget = function (config) {
         q: '',
         qc: '',
         hubFilter: '',
-        showHubData: false
+        showHubData:false,
+        taxa_filter: ''
     };
 
     var urls = {};
+
+    var mapTheme = {};
+    var mapLayers = {};
+
 
     /**
      * Constructor
@@ -235,10 +240,15 @@ var RegionWidget = function (config) {
         state.showHubData = config.showHubData || false;
         state.hubFilter = config.hubFilter || '';
 
+        state.taxa_filter = config.taxa_filter;
+
         // Check previous existing state
         updateState($.bbq.getState());
 
         urls = config.urls;
+
+        mapTheme = config.mapTheme;
+        mapLayers = config.mapLayers;
 
         initializeTabs();
 
@@ -440,6 +450,13 @@ var RegionWidget = function (config) {
 
         getUrls: function () {
             return urls;
+        },
+
+        getMapTheme: function() {
+            return mapTheme;
+        },
+        getMapLayers: function() {
+            return mapLayers;
         },
 
         getCurrentState: function () {
@@ -808,6 +825,15 @@ var RegionMap = function (config) {
                 }
             });
         }
+
+        var urls = regionWidget.getUrls();
+        var mapTheme = regionWidget.getMapTheme();
+        var mapLayers = regionWidget.getMapLayers();
+        if (mapLayers.mapLayersLabels != '') {
+            addMapLegend(true);
+        } else {
+            $('#mapLegend').hide();
+        }
     };
 
     /**
@@ -850,7 +876,10 @@ var RegionMap = function (config) {
             (this.checked)
                 ? $('#occurrencesOpacity').slider('enable')
                 : $('#occurrencesOpacity').slider('disable');
-            toggleOverlay(1, this.checked);
+            for (var i = 1; i < map.overlayMapTypes.length; i++) {
+                toggleOverlay(i, this.checked);
+            }
+            // toggleOverlay(1, this.checked);
         });
         $("#toggleRegion").click(function () {
             $('#maploading').fadeOut("fast");
@@ -859,6 +888,35 @@ var RegionMap = function (config) {
                 : $('#regionOpacity').slider('disable');
             toggleOverlay(0, this.checked);
         });
+    };
+
+    var addMapLegend = function (addToMap) {
+
+        var mapTheme = regionWidget.getMapTheme();
+        var mapLayers = regionWidget.getMapLayers();
+
+        $('#mapLegendTable').html('');
+        $("#mapLegendTable")
+            .append($('<tr>')
+                .append($('<td>')
+                    .addClass('legendTitle')
+                    .html(mapTheme.mapEnvLegendTitle + ":")
+                )
+            );
+
+            //use predefined legend entries and colours
+            var mapLabelsArr = mapLayers.mapLayersLabels.split("|");
+            var mapColoursArr = mapLayers.mapLayersColours.split("|");
+            for (var i = 0; i < mapLabelsArr.length; i++) {
+                addLegendItem(mapLabelsArr[i], 0, 0, 0, mapColoursArr[i],false); //use rgbhex and full label provided
+            }
+
+        if (addToMap) {
+            var legend = L.control({ position: "topleft" });
+            legend.onAdd = function(){return document.getElementById('mapLegend');}
+            legend.addTo(map);
+        }
+        return;
     };
 
     /**
@@ -961,6 +1019,9 @@ var RegionMap = function (config) {
      */
     var drawRecordsOverlay = function () {
         var urls = regionWidget.getUrls();
+        var mapTheme = regionWidget.getMapTheme();
+        var mapLayers = regionWidget.getMapLayers();
+
 
         if (useReflectService) {
             drawRecordsOverlay2();
@@ -987,12 +1048,16 @@ var RegionMap = function (config) {
 
     var drawRecordsOverlay2 = function () {
         var urls = regionWidget.getUrls();
+        var mapTheme = regionWidget.getMapTheme();
+        var mapLayers = regionWidget.getMapLayers();
 
         var url = urls.biocacheServiceUrl + "/mapping/wms/reflect?";
 
-        if (overlays[1]) {
+        for (i=1; i< overlays.length; i++) {
             // redrawing records, so remove previous records layer
-            map.removeLayer(overlays[1]);
+            if (overlays[i]) {
+                map.removeLayer(overlays[i]);
+            }
         }
 
         var queryParams = [];
@@ -1003,14 +1068,14 @@ var RegionMap = function (config) {
             bgcolor: "0xFFFFFF",
             cql_filter: "",
             symsize: 3,
-            env: "color:FF0000;name:circle;size:3;opacity:" + getOccurrenceOpacity(),
+            // env: "color:FF0000;name:circle;size:3;opacity:" + getOccurrenceOpacity(),
             exceptions: "application-vnd.ogc.se_inimage",
             outline: false,
             opacity: getOccurrenceOpacity(),
             uppercase: true
         };
-        var query = region.buildBiocacheQuery(queryParams, 0).join("&");
-        overlays[1] = L.tileLayer.wms(url + query, wmsParams);
+        // var query = region.buildBiocacheQuery(queryParams, 0).join("&");
+
 
         //do not fade in $('#maploading') when playing the time slider
         if (!regionWidget.getTimeControls() || !regionWidget.getTimeControls().isRunning
@@ -1018,12 +1083,53 @@ var RegionMap = function (config) {
             $('#maploading').fadeIn("fast")
         }
 
-        overlays[1].on('add', function (event) {
-            overlays[1].bringToFront();
-            $('#maploading').fadeOut("fast");
-        });
+        if (mapLayers.mapLayersFqs != '') { //additional FQ criteria for each map layer
+            var fqsArr = mapLayers.mapLayersFqs.split("|");
+            var coloursArr = mapLayers.mapLayersColours.split("|");
+            for (i = 0; i < fqsArr.length; i++) {
+                var query = region.buildBiocacheQuery([], 0).join("&");
+                query+="&fq=geospatial_kosher:true" //prob should add to config.biocache.filter but then it will appear in lots of queries
 
-        map.addLayer(overlays[1]);
+                wmsParams.env=mapTheme.mapEnvOptions + ";opacity:" + getOccurrenceOpacity() + ";color:" + coloursArr[i];
+
+                //below is a hack just to get it to work. It should  be the line below but the strings in the config file gets encoded - come back to it and sort it:
+                // overlays[i+1] = L.tileLayer.wms(url + query+"&fq="+fqsArr[i], wmsParams);
+                if (i==0) {
+                    overlays[i + 1] = L.tileLayer.wms(url + query + "&fq=identification_verification_status:(\"Unconfirmed\" OR \"Unconfirmed - plausible\" OR \"Unconfirmed - unreviewed\")", wmsParams);
+                }
+                else{
+                    overlays[i+1] = L.tileLayer.wms(url + query+"&fq=identification_verification_status:(\"Accepted\" OR \"Accepted - considered correct\" OR \"Accepted - correct\" OR \"verified\")", wmsParams);
+                }
+                //end hack
+
+                overlays[i+1].on('add', function (event) {
+                    overlays[i+1].bringToFront();
+                    $('#maploading').fadeOut("fast");
+                });
+                map.addLayer(overlays[i+1]);
+            }
+        }
+        else {
+            var query = region.buildBiocacheQuery([], 0).join("&");
+            query+="&fq=geospatial_kosher:true" //prob should add to config.biocache.filter but then it will appear in lots of queries
+            wmsParams.env=mapTheme.mapEnvOptions + ";opacity:" + getOccurrenceOpacity();
+
+            overlays[1] = L.tileLayer.wms(url + query, wmsParams);
+            overlays[1].on('add', function (event) {
+                overlays[1].bringToFront();
+                $('#maploading').fadeOut("fast");
+            });
+            map.addLayer(overlays[1]);
+        }
+
+        var mapTheme = regionWidget.getMapTheme();
+        var mapLayers = regionWidget.getMapLayers();
+        if (mapLayers.mapLayersLabels != '') {
+            addMapLegend(false);
+        } else {
+            $('#mapLegend').hide();
+        }
+
     };
 
     var _public = {
@@ -1046,4 +1152,36 @@ var RegionMap = function (config) {
 function decodeJSEncodedString(text) {
     var r = /\\u([\d\w]{4})/gi;
     return text.replace(r, function (match, grp) { return String.fromCharCode(parseInt(grp, 16)); } );
+}
+
+function addLegendItem(name, red, green, blue, rgbhex, hiderangemax){
+    //Copied from legacy. A lot of the code is not needed for the simple, fixed, legend we have
+    var isoDateRegEx = /^(\d{4})-\d{2}-\d{2}T.*/; // e.g. 2001-02-31T12:00:00Z with year capture
+
+    if (name.search(isoDateRegEx) > -1) {
+        // convert full ISO date to YYYY-MM-DD format
+        name = name.replace(isoDateRegEx, "$1");
+    }
+    var startOfRange = name.indexOf(":[");
+    if (startOfRange != -1) {
+        var nameVal = name.substring(startOfRange+1).replace("["," ").replace("]"," ").replace(" TO "," to ").trim();
+        if (hiderangemax) nameVal = nameVal.split(' to ')[0];
+    } else {
+        var nameVal = name;
+    }
+    var legendText = (nameVal);
+
+    $("#mapLegendTable")
+        .append($('<tr>')
+            .append($('<td>')
+                .append($('<i>')
+                    .addClass('legendColour')
+                    .attr('style', "background-color:" + (rgbhex!=''? "#" + rgbhex : "rgb("+ red +","+ green +","+ blue + ")") + ";")
+                )
+                .append($('<span>')
+                    .addClass('legendItemName')
+                    .html(legendText)
+                )
+            )
+        );
 }
