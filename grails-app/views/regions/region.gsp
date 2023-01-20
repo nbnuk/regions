@@ -38,21 +38,49 @@
         <g:if test="${enableHubData}">
             ,showHubData: ${hubState}
         </g:if>
-            ,bbox: {
-                sw: {
-                    lat: ${region.bbox?.minLat},
-                    lng: ${region.bbox?.minLng}
-                },
-                ne: {
-                    lat: ${region.bbox?.maxLat},
-                    lng: ${region.bbox?.maxLng}
-                }
+        ,taxa_filter: "${grailsApplication.config.filter?.taxa?: 'rank:(species OR subspecies)'}"
+    %{-- if specific theming is defined for the map, mapTheme will contain the legend title, map ENV options and
+         optionally a flag to hide the upper range of biocache-generated legend labels.
+         Whether the biocache legend or a custom legend will be used is based on whether the ENV options contain colormode.
+         If colormode is defined then the legend is drawn from biocache (with arbitrary colours).
+         Alternatively, the details of a custom legend are defined in the mapLayers variable, comprising an equal number of
+         pipe-delimited entries for each layer FQ, label and colour.
+Example .properties file entries:
+
+map.env.legendtitle=Licence
+
+#if using automatic legend from biocache then add colormode and legendhidemaxrange option
+#map.env.options=colormode:license,CC-BY,CC-BY-NC,CC0,OGC;name:circle;size:4
+#map.env.legendhidemaxrange=true
+
+#if using custom legend add layerfq options, labels and colours (same number of each and | delimited)
+#map.env.options=name:circle;size:4
+#map.layers.fqs=license:("CC-BY" OR "CC-BY-NC")|license:CC0
+#map.layers.labels=CC-BY*|CC0
+#map.layers.colours=E6704C|FFC0CB
+        --}%
+        ,mapTheme: {
+            mapEnvOptions: "${grailsApplication.config.map?.env?.options ?: 'color:' + (grailsApplication.config.map?.records?.colour ?: 'e6704c') + ';name:circle;size:4'}",
+                mapEnvLegendTitle: "${grailsApplication.config.map?.env?.legendtitle ?: ''}",
+                mapEnvLegendHideMax: "${grailsApplication.config.map.env?.legendhidemaxrange?:false}"
             }
-            ,useReflectService: ${useReflect}
-            ,enableRegionOverlay: ${enableRegionOverlay != null ? enableRegionOverlay : 'true'},
-            mapMinimalUrl: "${grailsApplication.config.getProperty('map.minimal.url')}",
-            mapMinimalAttribution: "${raw(grailsApplication.config.getProperty('map.minimal.attr'))}",
-            mapMinimalSubdomains: "${grailsApplication.config.getProperty('map.minimal.subdomains')}"
+            ,mapLayers: {
+                mapLayersFqs: "${grailsApplication.config.map?.layers?.fqs ?: ''}",
+                mapLayersLabels: "${grailsApplication.config.map?.layers?.labels ?: ''}",
+                mapLayersColours: "${grailsApplication.config.map?.layers?.colours ?: ''}"
+            }
+        ,bbox: {
+            sw: {
+                lat: ${region.bbox?.minLat},
+                lng: ${region.bbox?.minLng}
+            },
+            ne: {
+                lat: ${region.bbox?.maxLat},
+                lng: ${region.bbox?.maxLng}
+            }
+        }
+        ,useReflectService: ${useReflect}
+            ,enableRegionOverlay: ${enableRegionOverlay != null ? enableRegionOverlay : 'true'}
         };
     </asset:script>
 
@@ -227,6 +255,7 @@
 
             <div id="region-map">
             </div>
+            <div id="mapLegend"><table id="mapLegendTable"></table></div>
         </div>
 
         <div class="accordion" id="opacityControls">
@@ -256,6 +285,7 @@
                 </div>
             </div>
         </div>
+        <div class="mapNote"><g:message code="map.note" /></div>
     </div>
 </div>
 

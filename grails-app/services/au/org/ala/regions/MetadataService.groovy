@@ -102,6 +102,31 @@ class MetadataService {
         }
     }
 
+
+    private Collection removeDuplicateSpeciesGroups(def speciesGroupList){
+        Map distinctSpeciesGroupList = [:]
+
+        speciesGroupList.each { group ->
+
+            def distinctGroup = distinctSpeciesGroupList.get(group.speciesGroup)
+            if (!distinctGroup) {
+                distinctGroup = group
+                distinctGroup.taxa = []
+                distinctSpeciesGroupList << [(group.speciesGroup):distinctGroup]
+            }
+
+            group.taxa.each { subgroup ->
+                if (!distinctGroup.taxa.find { it.common == subgroup.common }) {
+                    distinctGroup.taxa << subgroup
+                }
+            }
+
+        }
+
+        return distinctSpeciesGroupList.values()
+
+    }
+
     /**
      *
      * @param regionFid
@@ -116,9 +141,11 @@ class MetadataService {
         if (!(responseGroups instanceof Map && responseGroups?.error)) {
             Map subgroupsWithRecords = getSubgroupsWithRecords(regionFid, regionType, regionName, regionPid, showHubData)
 
+            def distinctResponseGroups = removeDuplicateSpeciesGroups(responseGroups)
+
             // subgroup.name is valid for species_subgroup:subgroup.name biocache-service queries
             // group.speciesGroup is not valid for searching.
-            responseGroups.each { group ->
+            distinctResponseGroups.each { group ->
                 def groupfq = ''
                 group.taxa.each { subgroup ->
                     if (subgroupsWithRecords[subgroup.common]) {
@@ -414,7 +441,7 @@ class MetadataService {
     }
 
     boolean isValidTimeRange(String from, String to) {
-        return from && to && (from != WS_DATE_FROM_DEFAULT || to != Calendar.getInstance().get(Calendar.YEAR))
+        return from && to && (from != WS_DATE_FROM_DEFAULT || to != Calendar.getInstance().get(Calendar.YEAR).toString())
     }
 
     /**

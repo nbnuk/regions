@@ -1,5 +1,8 @@
 package au.org.ala.regions
 
+import groovyx.net.http.*
+import static groovyx.net.http.ContentType.*
+import static groovyx.net.http.Method.*
 import okhttp3.MediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -74,7 +77,17 @@ class HabitatController {
 
         fqParam = fqParam + ")"
 
-        OkHttpClient client = new OkHttpClient()
+        def http = new HTTPBuilder( grailsApplication.config.biocacheService.baseURL + '/webportal/params' )
+        http.request( POST, URLENC ) { req ->
+            body = [
+                    q: fqParam,
+                    fq: "-occurrence_status:absent",
+                    title: title
+            ]
+            response.success = { resp, json ->
+                def qid = json.keySet().first()
+                redirect(url: grailsApplication.config.biocache.baseURL  + "/occurrences/search?q=qid:" + qid)
+            }
 
         Request request = new Request.Builder()
                     .url(grailsApplication.config.getProperty('biocacheService.baseURL') + '/webportal/params')

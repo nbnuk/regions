@@ -29,8 +29,10 @@
         <p>
             <g:message code="select.region.help1"/>
             <br/>
+        <g:message code="map.note" />
             <g:message code="select.region.help2"/>
         </p>
+        <p><g:message code="map.note" /></p>
     </div>
 </div>
 
