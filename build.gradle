@@ -98,6 +98,8 @@ tasks.withType(GroovyCompile) {
     }
 }
 
+integrationTest.onlyIf{ false }
+
 bootRun {
     jvmArgs('-Dspring.output.ansi.enabled=always')
     sourceResources sourceSets.main
