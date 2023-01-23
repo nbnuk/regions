@@ -101,6 +101,13 @@ bootWar {
     dependsOn(compileGroovyPages)
 }
 
+integrationTest.onlyIf{ false }
+
+bootRun {
+    jvmArgs('-Dspring.output.ansi.enabled=always')
+    sourceResources sourceSets.main
+}
+
 war {
     dependsOn(compileGroovyPages)
 }

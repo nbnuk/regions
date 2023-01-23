@@ -5,6 +5,10 @@ branches:
   only:
   - master
   - develop
+  - feature/oidc-grails4
+  - Leaflet-migration
+  - hotfix
+  - master-nbn
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
   - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
