@@ -895,7 +895,6 @@ var RegionMap = function (config) {
             for (var i = 1; i < map.overlayMapTypes.length; i++) {
                 toggleOverlay(i, this.checked);
             }
-            // toggleOverlay(1, this.checked);
         });
         $("#toggleRegion").click(function () {
             $('#maploading').fadeOut("fast");
@@ -1084,7 +1083,6 @@ var RegionMap = function (config) {
             bgcolor: "0xFFFFFF",
             cql_filter: "",
             symsize: 3,
-            // env: "color:FF0000;name:circle;size:3;opacity:" + getOccurrenceOpacity(),
             exceptions: "application-vnd.ogc.se_inimage",
             outline: false,
             opacity: getOccurrenceOpacity(),
@@ -1104,7 +1102,7 @@ var RegionMap = function (config) {
             var coloursArr = mapLayers.mapLayersColours.split("|");
             for (i = 0; i < fqsArr.length; i++) {
                 var query = region.buildBiocacheQuery([], 0).join("&");
-                query+="&fq=geospatial_kosher:true" //prob should add to config.biocache.filter but then it will appear in lots of queries
+                //query+="&fq=geospatial_kosher:true" //prob should add to config.biocache.filter but then it will appear in lots of queries
 
                 wmsParams.env=mapTheme.mapEnvOptions + ";opacity:" + getOccurrenceOpacity() + ";color:" + coloursArr[i];
 
@@ -1127,7 +1125,7 @@ var RegionMap = function (config) {
         }
         else {
             var query = region.buildBiocacheQuery([], 0).join("&");
-            query+="&fq=geospatial_kosher:true" //prob should add to config.biocache.filter but then it will appear in lots of queries
+            //query+="&fq=geospatial_kosher:true" //prob should add to config.biocache.filter but then it will appear in lots of queries
             wmsParams.env=mapTheme.mapEnvOptions + ";opacity:" + getOccurrenceOpacity();
 
             overlays[1] = L.tileLayer.wms(url + query, wmsParams);
