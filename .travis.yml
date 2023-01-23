@@ -14,17 +14,11 @@ before_cache:
   - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
 cache:
   directories:
-  - $HOME/.m2
-  - $HOME/.gradle/caches/
-  - $HOME/.gradle/wrapper/
-
-install:
-  - 'travis_wait 30 ./gradlew clean'
-  - './gradlew assemble'
-
+  - "$HOME/.m2"
+  - "$HOME/.gradle/caches/"
+  - "$HOME/.gradle/wrapper/"
 after_success:
-  - '[ "${TRAVIS_PULL_REQUEST}" = "false" ] && travis_retry ./gradlew publish -x test'
-
+- '[ "${TRAVIS_PULL_REQUEST}" = "false" ] && travis_retry ./gradlew publish -x test'
 env:
   global:
   - JAVA_TOOL_OPTIONS=-Dhttps.protocols=TLSv1.2
