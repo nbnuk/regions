@@ -11,16 +11,17 @@ branches:
   - hotfix
   - master-nbn
 before_cache:
-  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
-  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+- rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+- rm -fr $HOME/.gradle/caches/*/plugin-resolution/
 cache:
   directories:
-  - $HOME/.m2
-  - $HOME/.gradle/caches/
-  - $HOME/.gradle/wrapper/
+  - "$HOME/.m2"
+  - "$HOME/.gradle/caches/"
+  - "$HOME/.gradle/wrapper/"
 after_success:
-  - '[ "${TRAVIS_PULL_REQUEST}" = "false" ] && travis_retry ./gradlew publish -x test'
-
+- '[ "${TRAVIS_PULL_REQUEST}" = "false" ] && travis_retry ./gradlew publish -x test'
 env:
   global:
   - JAVA_TOOL_OPTIONS=-Dhttps.protocols=TLSv1.2
+  - secure: KmXnnHKOL3PyGObn/R0w07sQ39a/Qo6D54uNkR6UdBOqv3eY22KUCqdCCN3LKxni+EddMydH+TN+8DhBcqftbwT8WOAIlBK89HizYOyxz8oOJZxiWeXTSSqEYQhgBqNlEfcYsV7Vc//Q4o/B1JJ1S6YoCPnwJ38hmDUHftMr7s4wvtG4Oez80aKDPrnUPwzm4ce+N+PeNvK8GdBCs5YWbqj7V3TTL6hVeakJJt0J7ZskN7Wnbhshf6phV6ovBvD4+yzwOmC7c6AsbUv7D/IjctiSlEyiGSb+jlgTq3HbvbO2i8CsBGXwFKiuc0gxseeQsu7PJ2D55k5ncCxyRxY8N4nokHYaX7pqiayckcv6aLkT6JLRxOfhI6aXnifduM1j6Q+4s19Kt91CJmB+cu2Kk2BRs/+IycGrwdhv8NLt20SSpfXcv37U8VnrItvfDVQOv9dONS6XSNHbntlwIQuLkMvJhfM5EkvDn2ZwIxWZQe3UBjOQY4juA7dIHC8+bRcTyWAm1oVnfsf3FBcsTtOugIVSIIEfsAEEFNXu4U3J8YVgbRdvV68uOZepP1EpAUeoMHq9VKTHHV3dWkUkULAljyEfVJtGl1R1rSLvvz+roNVYqCMt/8TcsaCL7JcmdULjL2Z9KYZq4kA2KLlNXG3kXjFpITtsi57lb6hO1hbc/fE=
+  - secure: CkQpyf+2h9NUIMLMSt+de33j92gERaBzEMK/Ktm+pGY/gPiN+/6yZ02YXLvUjn5szB78s7EkTyOUEzbRmMuACLtceElusPeSMtkrHytykwtWFDI3ghTrNCYfi7kEf4uBgJAO1K0RJTeo2HmrUgay1FTe7fR3pYjh5zHj/f9aRzhdRWjSlJLoxF8Kj6DazFZ32Cwfq/7LJTG8cmTfepD0/8e1aSGXK0QnNSp+r/7w7aQYi3+TA1HB5NTNPmly0HRP4ZVHHWQ1FHOwjUJnDBM6LzOImd3OG3CQYArt5I1iBOB1uLNB+/SMkmUetGSHs6+7UQJvUqXAqf5I+UaLhm0BYd4nBYiOaaNHuGakhr2Hc94TOBqHu4vzEbNLBKy/zYexjbjJGsfE9fam6m5VpgtNsM73ZWYDsfnrBCA51pedZKXQqxbeJZGhiawQp4G5Uh8GClzJ8Tm7YgILJHGW43o030DdDC606kNRtOPjiQXR75s5OOSDeKX8qjD1EfySD09C7zQTubYXZA+zUVVkMDwh7l7bD1aALQYDdAHEZdybA4ylPb+rCiNRgL8V1KIlkwtJOiikcvzem45LddOLNZl2f+uPIpe4TRH8r4rR1zZdvotkiK3jJXNA0k6yYUHOqjHRP2qOb08uL5Y6HftIAR400mM4oytPFEhsKo+iuF4X8iw=
