@@ -1,3 +1,14 @@
+# 📦 Repository Archived
+
+This repository has been **archived** and is no longer actively maintained.
+
+All functionality previously found here has been migrated to the `atlas-index` repository.
+
+👉 Please visit [AtlasOfLivingAustralia/atlas-index](https://github.com/AtlasOfLivingAustralia/atlas-index) for ongoing development and updates.
+
+Thank you for your interest and support!
+
+
 # Regions [![Build Status](https://travis-ci.com/AtlasOfLivingAustralia/regions.svg?branch=master)](https://travis-ci.com/AtlasOfLivingAustralia/regions)
 
 The regions web application is a small grails 3 application that uses services from the Atlas of Living Australia (or another Living Atlas instance)
