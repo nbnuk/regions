@@ -53,6 +53,46 @@
                 </div>
             </g:each>
         </div>
+%{--        From Species--}%
+        <div class="input-group">
+            <input id="taxaFilter" name="fq" type="hidden" value="idxtype:TAXON">
+            <input id="search" class="form-control ac_input general-search" name="q" type="text" placeholder="Search the Atlas" autocomplete="on">
+            <span class="input-group-btn">
+                <input type="submit" class="form-control btn btn-primary" alt="Search" value="Search">
+            </span>
+        </div>
+%{--        Example--}%
+        <div class="form-group position-relative" style="max-width: 480px;">
+            <label for="region-autocomplete" class="font-weight-bold">
+                Search and select a region
+            </label>
+
+            <input
+                    id="region-autocomplete"
+                    type="text"
+                    class="form-control"
+                    autocomplete="off"
+                    placeholder="Start typing a region name…"
+                    role="combobox"
+                    aria-autocomplete="list"
+                    aria-expanded="false"
+                    aria-owns="region-autocomplete-list"
+            />
+
+            <!-- Suggestion dropdown -->
+            <div
+                    id="region-autocomplete-list"
+                    class="list-group position-absolute w-100 shadow-sm"
+                    role="listbox"
+                    style="z-index: 1050; max-height: 260px; overflow-y: auto; display: none;"
+            >
+                <!-- Suggestions injected here via JS -->
+            </div>
+
+            <small class="form-text text-muted">
+                Type at least 2 characters, then use ↑/↓ and Enter to choose.
+            </small>
+        </div>
     </div>
 
     <div class="col-md-8" id="rightPanel">
@@ -138,6 +178,166 @@
     });
 
     $('[data-toggle="tooltip"]').tooltip();
+
+
+%{--    (function () {--}%
+%{--        const input = document.getElementById('region-autocomplete');--}%
+%{--        const list  = document.getElementById('region-autocomplete-list');--}%
+
+%{--        if (!input || !list || !Array.isArray(REGIONS)) return;--}%
+
+%{--        let filtered = [];--}%
+%{--        let activeIndex = -1;--}%
+
+%{--        function setListVisible(visible) {--}%
+%{--            list.style.display = visible && filtered.length ? 'block' : 'none';--}%
+%{--            input.setAttribute('aria-expanded', visible && filtered.length ? 'true' : 'false');--}%
+%{--        }--}%
+
+%{--        function clearList() {--}%
+%{--            list.innerHTML = '';--}%
+%{--            filtered = [];--}%
+%{--            activeIndex = -1;--}%
+%{--            setListVisible(false);--}%
+%{--        }--}%
+
+%{--        function renderList() {--}%
+%{--            list.innerHTML = '';--}%
+%{--            if (!filtered.length) {--}%
+%{--                setListVisible(false);--}%
+%{--                return;--}%
+%{--            }--}%
+
+%{--            filtered.forEach((region, index) => {--}%
+%{--                const item = document.createElement('button');--}%
+%{--                item.type = 'button';--}%
+%{--                item.className = 'list-group-item list-group-item-action';--}%
+%{--                item.setAttribute('role', 'option');--}%
+%{--                item.setAttribute('data-index', index);--}%
+%{--                item.setAttribute('data-id', region.id);--}%
+
+%{--                // Optional: show type as muted text--}%
+%{--                item.innerHTML = `--}%
+%{--                    <div class="d-flex flex-column">--}%
+%{--                        <span>${region.name}</span>--}%
+%{--                        <small class="text-muted">${region.type}</small>--}%
+%{--                        ${region.type ? `<small class="text-muted">${region.type}</small>` : ''}--}%
+%{--                    </div>--}%
+%{--                    `;--}%
+
+%{--        item.addEventListener('mousedown', function (e) {--}%
+%{--            // mousedown so click works before blur--}%
+%{--            e.preventDefault();--}%
+%{--            selectRegionByIndex(index);--}%
+%{--        });--}%
+
+%{--        list.appendChild(item);--}%
+%{--    });--}%
+
+%{--    setListVisible(true);--}%
+%{--    }--}%
+
+%{--    function filterRegions(query) {--}%
+%{--    const q = query.trim().toLowerCase();--}%
+%{--    if (q.length < 2) {--}%
+%{--        clearList();--}%
+%{--        return;--}%
+%{--    }--}%
+
+%{--    filtered = REGIONS--}%
+%{--        .filter(r => r.name.toLowerCase().includes(q))--}%
+%{--        .slice(0, 20); // Limit results, like MUI Autocomplete--}%
+
+%{--    activeIndex = -1;--}%
+%{--    renderList();--}%
+%{--    }--}%
+
+%{--    function highlightActive() {--}%
+%{--    const items = list.querySelectorAll('.list-group-item');--}%
+%{--    items.forEach((item, idx) => {--}%
+%{--        if (idx === activeIndex) {--}%
+%{--            item.classList.add('active');--}%
+%{--            item.setAttribute('aria-selected', 'true');--}%
+%{--            item.scrollIntoView({ block: 'nearest' });--}%
+%{--        } else {--}%
+%{--            item.classList.remove('active');--}%
+%{--            item.removeAttribute('aria-selected');--}%
+%{--        }--}%
+%{--    });--}%
+%{--    }--}%
+
+%{--    function moveActive(delta) {--}%
+%{--    if (!filtered.length) return;--}%
+
+%{--    activeIndex += delta;--}%
+
+%{--    if (activeIndex < 0) activeIndex = filtered.length - 1;--}%
+%{--    if (activeIndex >= filtered.length) activeIndex = 0;--}%
+
+%{--    highlightActive();--}%
+%{--    }--}%
+
+%{--    function selectRegionByIndex(index) {--}%
+%{--    if (index < 0 || index >= filtered.length) return;--}%
+%{--    const region = filtered[index];--}%
+
+%{--    input.value = region.name;--}%
+%{--    clearList();--}%
+
+%{--    // Hook into your existing region selection logic here:--}%
+%{--    onRegionSelected(region);--}%
+%{--    }--}%
+
+%{--    function onRegionSelected(region) {--}%
+%{--    // This is the bridge back into your existing map/region code.--}%
+%{--    // Adjust to match *your* function names.--}%
+%{--    // Examples:--}%
+%{--    //   window.selectRegion(region.id);--}%
+%{--    //   window.selectRegionByName(region.name);--}%
+%{--    //   window.regionMap.selectRegion(region.id);--}%
+%{--    if (typeof window.selectRegion === 'function') {--}%
+%{--        window.selectRegion(region.id);--}%
+%{--    } else if (typeof window.selectRegionByName === 'function') {--}%
+%{--        window.selectRegionByName(region.name);--}%
+%{--    } else {--}%
+%{--        console.log('Region selected:', region);--}%
+%{--    }--}%
+%{--    }--}%
+
+%{--    // --- Event handlers -----}%
+
+%{--    input.addEventListener('input', function () {--}%
+%{--    filterRegions(input.value);--}%
+%{--    });--}%
+
+%{--    input.addEventListener('keydown', function (e) {--}%
+%{--    switch (e.key) {--}%
+%{--        case 'ArrowDown':--}%
+%{--            e.preventDefault();--}%
+%{--            moveActive(1);--}%
+%{--            break;--}%
+%{--        case 'ArrowUp':--}%
+%{--            e.preventDefault();--}%
+%{--            moveActive(-1);--}%
+%{--            break;--}%
+%{--        case 'Enter':--}%
+%{--            if (filtered.length && activeIndex >= 0) {--}%
+%{--                e.preventDefault();--}%
+%{--                selectRegionByIndex(activeIndex);--}%
+%{--            }--}%
+%{--            break;--}%
+%{--        case 'Escape':--}%
+%{--            clearList();--}%
+%{--            break;--}%
+%{--    }--}%
+%{--    });--}%
+
+%{--    // Close suggestions when focus leaves--}%
+%{--    input.addEventListener('blur', function () {--}%
+%{--    // Slight delay so click on an item still registers--}%
+%{--    setTimeout(clearList, 150);--}%
+%{--    });--}%
+%{--    })();--}%
 
 </asset:script>
 </body>

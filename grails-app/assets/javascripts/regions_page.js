@@ -269,7 +269,7 @@
                 sld_body = '<?xml version="1.0" encoding="UTF-8"?><StyledLayerDescriptor version="1.0.0" xmlns="http://www.opengis.net/sld"><NamedLayer><Name>ALA:LAYERNAME</Name><UserStyle><FeatureTypeStyle><Rule><Title>Polygon</Title><PolygonSymbolizer><Fill><CssParameter name="fill">COLOUR</CssParameter><CssParameter name="fill-opacity">FILL_OPACITY</CssParameter></Fill><Stroke><CssParameter name="stroke">#000000</CssParameter><CssParameter name="stroke-width">1</CssParameter></Stroke></PolygonSymbolizer></Rule></FeatureTypeStyle></UserStyle></NamedLayer></StyledLayerDescriptor>';
 
             colour = colour || '#FFFFFF';
-            order = order == undefined ? 1 : order;
+            order = order === undefined ? 1 : order;
 
             if (this.other) {
                 this.drawOtherLayers();
@@ -369,7 +369,7 @@
 
     // (name, layerName, fid, bieContext, order, displayName)
     function createRegionTypes() {
-        if (REGIONS == undefined) {
+        if (REGIONS === undefined) {
             REGIONS = {}
         }
         for (var rtype in REGIONS.metadata) {
