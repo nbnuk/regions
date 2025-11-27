@@ -123,7 +123,7 @@ grails.hibernate.cache.queries = false
 grails.hibernate.pass.readonly = false
 // configure passing read-only to OSIV session by default, requires "singleSession = false" OSIV mode
 grails.hibernate.osiv.readonly = false
-
+grails.app.context = "/"
 def loggingDir = (System.getProperty('catalina.base') ? System.getProperty('catalina.base') + '/logs' : './logs')
 def appName = grails.util.Metadata.current.'app.name'
 // log4j configuration

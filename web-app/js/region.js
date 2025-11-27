@@ -1096,7 +1096,6 @@ var RegionMap = function (config) {
             //console.log("legend: " + legendUrl);
             $.ajax({
                 url: legendUrl,
-                jsonp: "callback",
                 dataType: "json",
                 success: function (data) {
                     $.each(data, function (index, legendDef) {

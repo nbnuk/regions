@@ -76,7 +76,7 @@ function loadFacetCharts(chartOptions) {
     var query = chartOptions.query ? chartOptions.query : buildQueryString(chartOptions.instanceUid);
     $.ajax({
       url: urlConcat(biocacheServicesUrl, "/occurrences/search.json?pageSize=0&q=") + query,
-      dataType: 'jsonp',
+      dataType: 'json',
       error: function() {
         cleanUp();
       },
@@ -256,7 +256,7 @@ function lookupEntityName(chart, table, opts, entity) {
     for (var i = 0; j = table.getNumberOfRows(), i < j; i++) {
         uidList.push(table.getValue(i,0));
     }
-    $.jsonp({
+    $.json({
       url: collectionsUrl + "/ws/resolveNames/" + uidList.join(',') + "?callback=?",
       cache: true,
       success: function(data) {
@@ -343,7 +343,7 @@ var taxonomyChart = {
 
         $.ajax({
             url: url,
-            dataType: 'jsonp',
+            dataType: 'json',
             timeout: 30000,
             complete: function(jqXHR, textStatus) {
                 if (textStatus == 'timeout') {
@@ -603,7 +603,7 @@ function initTaxonTree(treeOptions) {
               }
               return u;
           },
-          dataType: 'jsonp',
+          dataType: 'json',
           success: function(data) {
               var nodes = [];
               var rank = data.rank;
