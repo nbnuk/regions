@@ -1,6 +1,7 @@
 language: groovy
 jdk:
-- oraclejdk7
+- openjdk7
+dist: xenial
 sudo: false
 branches:
   only:
