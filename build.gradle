@@ -56,6 +56,7 @@ apply from: "${project.projectDir}/gradle/publish.gradle"
 repositories {
     mavenLocal()
     maven { url "https://nexus.ala.org.au/content/groups/public/" }
+    maven { url "https://nexus.ala.org.au/content/repositories/releases/" }
     mavenCentral()
     maven { url "https://repo.grails.org/grails/core/" }
 }
@@ -116,7 +117,7 @@ bootWar {
     dependsOn(compileGroovyPages)
 }
 
-integrationTest.onlyIf{ false }
+//integrationTest.onlyIf{ false }
 
 bootRun {
     jvmArgs('-Dspring.output.ansi.enabled=always')

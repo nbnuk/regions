@@ -352,15 +352,14 @@
         /* Highlight the specified region name in the list of regions for this set
          * @param regionName the name to highlight */
         highlightInList: function (regionName) {
-            // highlight the specified region
-            var $selected = $('#' + this.name + ' li').filter(function (index) {
+            // Use attribute selector instead of #ID — allows spaces, parentheses, etc.
+            const selector = "[id='" + this.name.replace(/'/g, "\\'") + "'] li";
+
+            const $selected = $(selector).filter(function () {
                 return $(this).html() === regionName;
             });
+
             $selected.addClass('selected');
-            // scroll to it
-            /*$pane.animate({
-             scrollTop: $selected.offset().top
-             }, 2000);*/
         }
     };
 
@@ -369,12 +368,12 @@
 
     // (name, layerName, fid, bieContext, order, displayName)
     function createRegionTypes() {
-        if (REGIONS == undefined) {
+        if (REGIONS === undefined) {
             REGIONS = {}
         }
         for (var rtype in REGIONS.metadata) {
             if (REGIONS.metadata.hasOwnProperty(rtype)) {
-                var md = REGIONS.metadata[rtype];
+                const md = REGIONS.metadata[rtype];
                 layers[rtype] = new RegionSet(md.name, md.layerName, md.fid, md.bieContext, md.order, "");
             }
         }
