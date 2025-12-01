@@ -775,14 +775,26 @@
          | Set up accordion and handle changes
          \*****************************************/
         $('#accordion').accordion({
+            collapsible: true,                     // allow closing the same panel
+            heightStyle: 'content',                // recommended to avoid weird heights
+            active: selectedRegionType.order ?? false, // keep initial selection, or start closed
             activate: function (event, ui) {
-                layers[$(ui.newPanel).attr('layer')].set();
-                //infoWindow.close();infoWindow.close();
-            },
-            active: selectedRegionType.order
+                // If a panel is being opened
+                if (ui.newPanel && ui.newPanel.length > 0) {
+                    const layerName = $(ui.newPanel).attr('layer');
+                    if (layerName && layers[layerName]) {
+                        layers[layerName].set();
+                    }
+                }
+                // If a panel is being closed (ui.newPanel is empty), do nothing
+            }
         });
-        if (options.accordionPanelMaxHeight)
-            $('#accordion .ui-accordion-content').css('max-height', options.accordionPanelMaxHeight);
+
+        // Respect optional max-height setting
+        if (options.accordionPanelMaxHeight) {
+            $('#accordion .ui-accordion-content')
+                .css('max-height', options.accordionPanelMaxHeight);
+        }
 
         /*****************************************\
          | Set up opacity sliders
