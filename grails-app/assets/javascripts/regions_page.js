@@ -34,8 +34,7 @@
 (function (windows) {
     "use strict";
 
-    var
-        // represents the map and its associated properties and events
+    let // represents the map and its associated properties and events
         map,
 
         //  Urls are injected from config
@@ -53,6 +52,18 @@
 
         // the currently selected region - will be null if no region is selected else an instance of Region
         selectedRegion = null;
+
+    // Simple debounce helper for search inputs
+    function debounce(fn, delay) {
+        let timer;
+        return function () {
+            const context = this, args = arguments;
+            clearTimeout(timer);
+            timer = setTimeout(function () {
+                fn.apply(context, args);
+            }, delay);
+        };
+    }
 
     // helper method
     function clearSelectedRegion() {
@@ -237,7 +248,9 @@
         /* Write the list of regions to the regionSet's DOM container - loading first if required
          * @param callbackOnComplete a global-scope function to call when the list is written */
         writeList: function (callbackOnComplete) {
-            var $content = $('#' + layers[this.name].layerName), html = "<ul>", me = this,
+            let $content = $('#' + layers[this.name].layerName),
+                html = "",
+                regionSet = this,
                 id;
             if (!this.loaded()) {
                 // load content asynchronously and execute this method when complete
@@ -245,23 +258,102 @@
                 return;
             }
             if ($content.find('ul').length === 0) {
+                const searchId = this.name + '-search';
+
+                html += "<div class='region-search-wrapper' " +
+                    "style='position:relative; margin-bottom:4px;'>";
+
+                // Search box
+                html += "<input type='text' " +
+                    "class='form-control input-sm region-search-input font-size' " +
+                    "id='" + searchId + "' " +
+                    "placeholder='Start typing to filter...' " +
+                    "autocomplete='off'" +
+                    "style='font-size:0.80em; padding-right:22px;' />";
+
+                // Clear icon (×) on the right, hidden until there is content
+                html += "<span class='region-search-clear' " +
+                    "title='Clear filter' " +
+                    "style='position:absolute; right:8px; top:50%; transform:translateY(-50%); " +
+                    "cursor:pointer; display:none; font-size:14px; line-height:1;'>×</span>";
+
+                html += "</div>";
+
+                // List
+                html += "<ul>";
                 $.each(this.sortedList, function (i, name) {
-                    id = me.other ? me.objects[name].layerName : me.objects[name].id;
+                    id = regionSet.other ? regionSet.objects[name].layerName : regionSet.objects[name].id;
                     html += "<li class='regionLink' id='" + id + "'>" + name + "</li>";
                 });
                 html += "</ul>";
                 $content.find('span.loading').remove();
                 $content.append(html);
-                // Correctly size the content box based on the number of items.  We are relying on the max-height css
-                // to stop it from growing too large.
-                var itemHeight = $content.find('li').height();
-                $content.height(this.sortedList.length * itemHeight);
+
+                // Initial height calculation (matches previous behaviour, but includes search box)
+                const $items = $content.find('li.regionLink'),
+                    itemHeight = $items.first().outerHeight() || 0,
+                    visibleCount = $items.length,
+                    searchHeight = $content.find('.region-search-input').outerHeight(true) || 0;
+
+                if (itemHeight && visibleCount) {
+                    $content.height(visibleCount * itemHeight + searchHeight);
+                }
+
+                // Attach debounced filter behaviour (only once per panel)
+                const $wrapper = $content.find('.region-search-wrapper');
+                const $input = $wrapper.find('.region-search-input');
+                const $clear = $wrapper.find('.region-search-clear');
+                if ($input.data('has-region-filter') !== true) {
+                    $input.data('has-region-filter', true);
+
+                    $input.on('input', debounce(function () {
+                        const term = $.trim($(this).val().toLowerCase());
+                        const $panel = $content;
+                        const $lis = $panel.find('li.regionLink');
+
+                        // Show/hide clear icon
+                        $clear.toggle(!!term);
+
+                        if (!term) {
+                            // Show all items when search is cleared
+                            $lis.show();
+                        } else {
+                            $lis.each(function () {
+                                const text = $(this).text().toLowerCase();
+                                $(this).toggle(text.indexOf(term) !== -1);
+                            });
+                        }
+
+                        // Recalculate height based on visible items
+                        const $visible = $panel.find('li.regionLink:visible'),
+                            vCount = $visible.length,
+                            vItemHeight = $visible.first().outerHeight() || $lis.first().outerHeight() || 0,
+                            sHeight = $panel.find('.region-search-input').outerHeight(true) || 0;
+
+                        if (vItemHeight && vCount) {
+                            $panel.height(vCount * vItemHeight + sHeight);
+                        } else {
+                            // If nothing matches, just show search box height
+                            $panel.height(sHeight);
+                        }
+                    }, 250)); // 250ms debounce because why not?
+
+                    // Clear icon click: empty, reset list, refocus
+                    $clear.on('click', function (e) {
+                        e.preventDefault();
+                        $input.val('');
+                        // Trigger input handler so it resets list & height and hides the icon
+                        $input.trigger('input');
+                        $input.focus();
+                    });
+                }
             }
             if (callbackOnComplete) {
                 // assume global scope
-                callbackOnComplete();// TODO: fix this - pass in function itself?
+                callbackOnComplete(); // TODO: fix this - pass in function itself?
             }
         },
+
         /* Draw the layer for this set (or sub-set) */
         drawLayer: function (colour, order) {
             var redraw = false,
@@ -269,7 +361,7 @@
                 sld_body = '<?xml version="1.0" encoding="UTF-8"?><StyledLayerDescriptor version="1.0.0" xmlns="http://www.opengis.net/sld"><NamedLayer><Name>ALA:LAYERNAME</Name><UserStyle><FeatureTypeStyle><Rule><Title>Polygon</Title><PolygonSymbolizer><Fill><CssParameter name="fill">COLOUR</CssParameter><CssParameter name="fill-opacity">FILL_OPACITY</CssParameter></Fill><Stroke><CssParameter name="stroke">#000000</CssParameter><CssParameter name="stroke-width">1</CssParameter></Stroke></PolygonSymbolizer></Rule></FeatureTypeStyle></UserStyle></NamedLayer></StyledLayerDescriptor>';
 
             colour = colour || '#FFFFFF';
-            order = order == undefined ? 1 : order;
+            order = order === undefined ? 1 : order;
 
             if (this.other) {
                 this.drawOtherLayers();
