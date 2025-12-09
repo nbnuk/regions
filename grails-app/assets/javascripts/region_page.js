@@ -782,14 +782,32 @@ var RegionMap = function (config) {
             scrollWheelZoom: false,
         });
 
-        var defaultBaseLayer = L.tileLayer(REGION_CONFIG.mapMinimalUrl, {
-                attribution: REGION_CONFIG.mapMinimalAttribution,
-                subdomains: REGION_CONFIG.mapMinimalSubdomains
-        });
+        // Fallbacks for config entries that might be missing
+        let baseUrl = REGION_CONFIG.mapMinimalUrl ||
+            'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+
+        let baseLayerOptions = {
+            attribution: REGION_CONFIG.mapMinimalAttribution ||
+                '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        };
+
+        // Only set subdomains if we actually have a value
+        if (REGION_CONFIG.mapMinimalSubdomains) {
+            if (Array.isArray(REGION_CONFIG.mapMinimalSubdomains)) {
+                baseLayerOptions.subdomains = REGION_CONFIG.mapMinimalSubdomains;
+            } else if (typeof REGION_CONFIG.mapMinimalSubdomains === 'string') {
+                baseLayerOptions.subdomains =
+                    REGION_CONFIG.mapMinimalSubdomains.indexOf(',') >= 0
+                        ? REGION_CONFIG.mapMinimalSubdomains.split(',')
+                        : REGION_CONFIG.mapMinimalSubdomains;
+            }
+        }
+
+        let defaultBaseLayer = L.tileLayer(baseUrl, baseLayerOptions);
 
         if (REGION_CONFIG.useGoogleApi) {
             // only show layer controls when Google API key is available
-            var baseLayers = {
+            let baseLayers = {
                 Minimal: defaultBaseLayer,
                 Road: L.gridLayer.googleMutant({ type: 'roadmap' }),
                 Terrain: L.gridLayer.googleMutant({ type: 'terrain' }),
@@ -1068,14 +1086,13 @@ var RegionMap = function (config) {
 
         var url = urls.biocacheServiceUrl + "/mapping/wms/reflect?";
 
-        for (i=1; i< overlays.length; i++) {
-            // redrawing records, so remove previous records layer
+        // remove previous records layers
+        for (var i = 1; i < overlays.length; i++) {
             if (overlays[i]) {
                 map.removeLayer(overlays[i]);
             }
         }
 
-        var queryParams = [];
         var wmsParams = {
             format: overlayFormat,
             layers: "ALA:occurrences",
@@ -1088,62 +1105,63 @@ var RegionMap = function (config) {
             opacity: getOccurrenceOpacity(),
             uppercase: true
         };
-        // var query = region.buildBiocacheQuery(queryParams, 0).join("&");
-        overlays[1] = L.tileLayer.wms(url + query, wmsParams);
 
-        //do not fade in $('#maploading') when playing the time slider
-        if (!regionWidget.getTimeControls() || !regionWidget.getTimeControls().isRunning
+        // do not fade in while the time slider is playing
+        if (!regionWidget.getTimeControls()
+            || !regionWidget.getTimeControls().isRunning
             || !regionWidget.getTimeControls().isRunning()) {
-            $('#maploading').fadeIn("fast")
+            $('#maploading').fadeIn("fast");
         }
 
-        if (mapLayers.mapLayersFqs != '') { //additional FQ criteria for each map layer
+        if (mapLayers.mapLayersFqs != '') {
+            // additional FQ criteria for each map layer
             var fqsArr = mapLayers.mapLayersFqs.split("|");
             var coloursArr = mapLayers.mapLayersColours.split("|");
-            for (i = 0; i < fqsArr.length; i++) {
+
+            for (var i = 0; i < fqsArr.length; i++) {
                 var query = region.buildBiocacheQuery([], 0).join("&");
-                //query+="&fq=geospatial_kosher:true" //prob should add to config.biocache.filter but then it will appear in lots of queries
 
-                wmsParams.env=mapTheme.mapEnvOptions + ";opacity:" + getOccurrenceOpacity() + ";color:" + coloursArr[i];
+                wmsParams.env = mapTheme.mapEnvOptions +
+                    ";opacity:" + getOccurrenceOpacity() +
+                    ";color:" + coloursArr[i];
 
-                //below is a hack just to get it to work. It should  be the line below but the strings in the config file gets encoded - come back to it and sort it:
-                // overlays[i+1] = L.tileLayer.wms(url + query+"&fq="+fqsArr[i], wmsParams);
-                if (i==0) {
-                    overlays[i + 1] = L.tileLayer.wms(url + query + "&fq=identification_verification_status:(\"Unconfirmed\" OR \"Unconfirmed - plausible\" OR \"Unconfirmed - unreviewed\")", wmsParams);
+                // NOTE: hack preserved from original code
+                if (i === 0) {
+                    overlays[i + 1] = L.tileLayer.wms(
+                        url + query + "&fq=identification_verification_status:(\"Unconfirmed\" OR \"Unconfirmed - plausible\" OR \"Unconfirmed - unreviewed\")",
+                        wmsParams
+                    );
+                } else {
+                    overlays[i + 1] = L.tileLayer.wms(
+                        url + query + "&fq=identification_verification_status:(\"Accepted\" OR \"Accepted - considered correct\" OR \"Accepted - correct\" OR \"verified\")",
+                        wmsParams
+                    );
                 }
-                else{
-                    overlays[i+1] = L.tileLayer.wms(url + query+"&fq=identification_verification_status:(\"Accepted\" OR \"Accepted - considered correct\" OR \"Accepted - correct\" OR \"verified\")", wmsParams);
-                }
-                //end hack
 
-                overlays[i+1].on('add', function (event) {
-                    overlays[i+1].bringToFront();
+                overlays[i + 1].on('add', function () {
+                    overlays[i + 1].bringToFront();
                     $('#maploading').fadeOut("fast");
                 });
-                map.addLayer(overlays[i+1]);
+                map.addLayer(overlays[i + 1]);
             }
-        }
-        else {
+        } else {
             var query = region.buildBiocacheQuery([], 0).join("&");
-            //query+="&fq=geospatial_kosher:true" //prob should add to config.biocache.filter but then it will appear in lots of queries
-            wmsParams.env=mapTheme.mapEnvOptions + ";opacity:" + getOccurrenceOpacity();
+            wmsParams.env = mapTheme.mapEnvOptions + ";opacity:" + getOccurrenceOpacity();
 
             overlays[1] = L.tileLayer.wms(url + query, wmsParams);
-            overlays[1].on('add', function (event) {
+            overlays[1].on('add', function () {
                 overlays[1].bringToFront();
                 $('#maploading').fadeOut("fast");
             });
             map.addLayer(overlays[1]);
         }
 
-        var mapTheme = regionWidget.getMapTheme();
-        var mapLayers = regionWidget.getMapLayers();
+        // (re)build legend
         if (mapLayers.mapLayersLabels != '') {
             addMapLegend(false);
         } else {
             $('#mapLegend').hide();
         }
-
     };
 
     var _public = {
