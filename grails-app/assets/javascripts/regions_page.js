@@ -167,12 +167,16 @@
                 this.drawLayer();
             }
 
+            if (map && typeof map.resetViewport === 'function') {
+                map.resetViewport();
+            }
+
             // add content to the region type pane if empty
             this.writeList(callbacks);
 
             // store last selected region type in hash params
-            if (this.name == 'states') {
-                if ($.bbq.getState('rt') != undefined) {
+            if (this.name === 'states') {
+                if ($.bbq.getState('rt') !== undefined) {
                     $.bbq.removeState('rt');
                 }
             } else {
@@ -655,11 +659,22 @@
 
             this.lmap.addLayer(defaultBaseLayer);
 
-            var initialBounds = L.latLngBounds(
-                L.latLng(config.bbox.sw.lat, config.bbox.sw.lng),
-                L.latLng(config.bbox.ne.lat, config.bbox.ne.lng));
+            // Use any pre-configured initial bounds (eg. UK) if available,
+            // otherwise fall back to the bbox from config and remember it.
+            let initialBounds;
+            if (this.initialBounds) {
+                initialBounds = this.initialBounds;
+            } else if (config.bbox && config.bbox.sw && config.bbox.ne) {
+                initialBounds = L.latLngBounds(
+                    L.latLng(config.bbox.sw.lat, config.bbox.sw.lng),
+                    L.latLng(config.bbox.ne.lat, config.bbox.ne.lng)
+                );
+                this.initialBounds = initialBounds;
+            }
 
-            this.lmap.fitBounds(initialBounds);
+            if (initialBounds) {
+                this.lmap.fitBounds(initialBounds);
+            }
 
             var that = this;
             this.lmap.on('click', this.clickHandler);
