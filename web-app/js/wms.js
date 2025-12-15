@@ -88,7 +88,7 @@ function getWMSObject(map, name, baseURL, customParams){
     "version=1.1.1",
     "bgcolor=0xFFFFFF",
     "transparent=TRUE",
-    "srs=EPSG:900913", // 3395?
+    "srs=EPSG:3857", // 3395?
     "width="+ tileWidth,
     "height="+ tileHeight
     ];
@@ -181,7 +181,7 @@ function getWMSTileUrl(coord, zoom, baseurl, customParams)
     "VERSION=1.1.1",
     "BGCOLOR=0xFFFFFF",
     "TRANSPARENT=TRUE",
-    "SRS=EPSG:900913", // 3395?
+    "SRS=EPSG:3857", // 3395?
     "WIDTH=256",
     "HEIGHT=256"
     ];
