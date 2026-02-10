@@ -92,15 +92,28 @@ var region = {
     buildBiocacheQuery: function (customParams, start, forChartValue) {
         var currentState = regionWidget.getCurrentState();
 
-        forChart = forChartValue || regionWidget.getCurrentState().tab === 'taxonomyTab';
+        var forChart = forChartValue || regionWidget.getCurrentState().tab === 'taxonomyTab';
 
         var params = customParams || [];
 
+        var normalizeQueryValue = function (value) {
+            if (!value) {
+                return value;
+            }
+            try {
+                // Normalize mixed/partial encodings (e.g. "%20" with raw "&") to a safe encoded form.
+                var decoded = decodeURIComponent(value.replaceAll('+', ' '));
+                return encodeURIComponent(decoded);
+            } catch (e) {
+                return encodeURIComponent(value);
+            }
+        };
+
         //q= must be first
         if (forChartValue) {
-            params.unshift(currentState.q);
+            params.unshift(normalizeQueryValue(currentState.q));
         } else {
-            params.unshift("q=" + currentState.q);
+            params.unshift("q=" + normalizeQueryValue(currentState.q));
         }
 
         if (forChart) {
