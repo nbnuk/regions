@@ -78,6 +78,19 @@ function setHubConfig() {
     }
 }
 
+function normalizeQueryValue(value) {
+    if (!value) {
+        return value;
+    }
+    try {
+        // Normalize mixed/partial encodings (e.g. "%20" with raw "&") to a safe encoded form.
+        var decoded = decodeURIComponent(value.replaceAll('+', ' '));
+        return encodeURIComponent(decoded);
+    } catch (e) {
+        return encodeURIComponent(value);
+    }
+}
+
 function refreshSpeciesGroup() {
     $('#groups').click()
 }
@@ -95,19 +108,6 @@ var region = {
         var forChart = forChartValue || regionWidget.getCurrentState().tab === 'taxonomyTab';
 
         var params = customParams || [];
-
-        var normalizeQueryValue = function (value) {
-            if (!value) {
-                return value;
-            }
-            try {
-                // Normalize mixed/partial encodings (e.g. "%20" with raw "&") to a safe encoded form.
-                var decoded = decodeURIComponent(value.replaceAll('+', ' '));
-                return encodeURIComponent(decoded);
-            } catch (e) {
-                return encodeURIComponent(value);
-            }
-        };
 
         //q= must be first
         if (forChartValue) {
@@ -151,7 +151,7 @@ var region = {
             params.push("start=" + start);
         }
 
-        if (timeFacet) {
+        if (timeFacet && !forChart) {
             params.push("fq=" + encodeURIComponent(timeFacet));
         }
 
