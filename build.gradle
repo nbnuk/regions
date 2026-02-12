@@ -100,6 +100,11 @@ dependencies {
 
 bootWar {
     dependsOn(compileGroovyPages)
+    // Keep WAR logging config aligned with upstream: only ship logback.xml.
+    doFirst {
+        delete("$buildDir/resources/main/logback.groovy")
+        delete("$buildDir/resources/main/logback.old.groovy")
+    }
 }
 
 //integrationTest.onlyIf{ false }
@@ -111,6 +116,11 @@ bootRun {
 
 war {
     dependsOn(compileGroovyPages)
+    // Keep WAR logging config aligned with upstream: only ship logback.xml.
+    doFirst {
+        delete("$buildDir/resources/main/logback.groovy")
+        delete("$buildDir/resources/main/logback.old.groovy")
+    }
 }
 
 java {
