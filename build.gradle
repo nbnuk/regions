@@ -98,13 +98,18 @@ dependencies {
     implementation  "org.grails.plugins:ala-bootstrap3:4.4.0"
 }
 
-bootWar {
-    dependsOn(compileGroovyPages)
-    // Keep WAR logging config aligned with upstream: only ship logback.xml.
+processResources {
+    // Exclude legacy Groovy logback configs; package logback.xml only.
+    exclude("logback.groovy", "logback.old.groovy")
+    // Gradle Copy tasks do not prune stale outputs, so remove legacy files explicitly.
     doFirst {
         delete("$buildDir/resources/main/logback.groovy")
         delete("$buildDir/resources/main/logback.old.groovy")
     }
+}
+
+bootWar {
+    dependsOn(compileGroovyPages)
 }
 
 //integrationTest.onlyIf{ false }
@@ -116,11 +121,6 @@ bootRun {
 
 war {
     dependsOn(compileGroovyPages)
-    // Keep WAR logging config aligned with upstream: only ship logback.xml.
-    doFirst {
-        delete("$buildDir/resources/main/logback.groovy")
-        delete("$buildDir/resources/main/logback.old.groovy")
-    }
 }
 
 java {
