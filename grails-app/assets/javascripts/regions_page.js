@@ -655,6 +655,8 @@
                     Satellite: L.gridLayer.googleMutant({ type: 'hybrid' })
                 };
                 this.lmap.layerControl = L.control.layers(baseLayers).addTo(this.lmap);
+
+                defaultBaseLayer = baseLayers.Terrain; //NBN
             }
 
             this.lmap.addLayer(defaultBaseLayer);

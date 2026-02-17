@@ -827,6 +827,8 @@ var RegionMap = function (config) {
                 Satellite: L.gridLayer.googleMutant({ type: 'hybrid' })
             };
             map.layerControl = L.control.layers(baseLayers).addTo(map);
+
+            defaultBaseLayer = baseLayers.Terrain; //NBN
         }
 
         map.addLayer(defaultBaseLayer);
