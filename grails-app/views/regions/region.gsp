@@ -258,6 +258,8 @@ map.env.legendtitle=Licence
             <div id="mapLegend"><table id="mapLegendTable"></table></div>
         </div>
 
+        <div class="pull-right mt-1"><a href="#licenseModal" class="text-danger" data-toggle="modal" data-target="#licenseModal"><i class="fa fa-exclamation-triangle"></i> <g:message code="map.license.title" /></a></div>
+
         <div class="accordion" id="opacityControls">
             <div class="accordion-group">
                 <div class="accordion-heading">
@@ -286,6 +288,20 @@ map.env.legendtitle=Licence
             </div>
         </div>
         <div class="mapNote"><g:message code="map.note" /></div>
+
+        <div class="modal fade" id="licenseModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="myModalLabel"><g:message code="map.license.title" /></h4>
+                    </div>
+                    <div class="modal-body">
+                        <g:message code="map.license.content" />
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
