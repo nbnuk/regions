@@ -104,27 +104,14 @@ class MetadataService {
 
 
     private Collection removeDuplicateSpeciesGroups(def speciesGroupList){
-        Map distinctSpeciesGroupList = [:]
 
-        speciesGroupList.each { group ->
-
-            def distinctGroup = distinctSpeciesGroupList.get(group.speciesGroup)
-            if (!distinctGroup) {
-                distinctGroup = group
-                distinctGroup.taxa = []
-                distinctSpeciesGroupList << [(group.speciesGroup):distinctGroup]
-            }
-
-            group.taxa.each { subgroup ->
-                if (!distinctGroup.taxa.find { it.common == subgroup.common }) {
-                    distinctGroup.taxa << subgroup
+        return speciesGroupList
+                .groupBy { it.speciesGroup }
+                .collect { speciesGroup, groups ->
+                    def combined = groups[0]
+                    combined.taxa = groups*.taxa.flatten().unique { it.common }
+                    combined
                 }
-            }
-
-        }
-
-        return distinctSpeciesGroupList.values()
-
     }
 
     /**
