@@ -147,7 +147,9 @@ class MetadataService {
                     groupfq += ')'
                 } else {
                     // exclude all results when there are no subgroups with records
-                    groupfq = '-*:*'
+                    //groupfq = '-*:*'
+                    //NBN - we have a group which has no subgroups so the above does not work. Filter by the group instead.
+                    groupfq = "species_group:(\"${group.speciesGroup.encodeAsJs()}\")"
                 }
 
                 groups << [name: group.speciesGroup, commonName: group.speciesGroup, fq: groupfq]
