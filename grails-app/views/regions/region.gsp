@@ -33,7 +33,7 @@
         <g:if test="${enableQueryContext}">
             ,qc: "${grailsApplication.config.getProperty('biocache.queryContext')}"
         </g:if>
-            ,hubFilter: "${raw((enableHubData ? grailsApplication.config.getProperty('hub.hubFilter') : '') + grailsApplication.config.getProperty('biocache.filter'))}"
+            ,hubFilter: "${raw((enableHubData ? grailsApplication.config.getProperty('hub.hubFilter') : '') + grailsApplication.config.getProperty('biocache.filter')?.encodeAsJavaScript())}"
             ,enableHubData: ${enableHubData ?: false}
         <g:if test="${enableHubData}">
             ,showHubData: ${hubState}
