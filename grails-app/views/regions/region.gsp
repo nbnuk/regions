@@ -65,7 +65,7 @@ map.env.legendtitle=Licence
                 mapEnvLegendHideMax: "${grailsApplication.config.map.env?.legendhidemaxrange?:false}"
             }
             ,mapLayers: {
-                mapLayersFqs: "${grailsApplication.config.map?.layers?.fqs ?: ''}",
+                mapLayersFqs: "${grailsApplication.config.map?.layers?.fqs?.encodeAsJavaScript() ?: ''}",
                 mapLayersLabels: "${grailsApplication.config.map?.layers?.labels ?: ''}",
                 mapLayersColours: "${grailsApplication.config.map?.layers?.colours ?: ''}"
             }

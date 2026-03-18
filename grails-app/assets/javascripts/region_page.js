@@ -1140,18 +1140,10 @@ var RegionMap = function (config) {
                     ";opacity:" + getOccurrenceOpacity() +
                     ";color:" + coloursArr[i];
 
-                // NOTE: hack preserved from original code
-                if (i === 0) {
-                    overlays[i + 1] = L.tileLayer.wms(
-                        url + query + "&fq=identification_verification_status:(\"Unconfirmed\" OR \"Unconfirmed - plausible\" OR \"Unconfirmed - unreviewed\")",
-                        wmsParams
-                    );
-                } else {
-                    overlays[i + 1] = L.tileLayer.wms(
-                        url + query + "&fq=identification_verification_status:(\"Accepted\" OR \"Accepted - considered correct\" OR \"Accepted - correct\" OR \"verified\")",
-                        wmsParams
-                    );
-                }
+                overlays[i + 1] = L.tileLayer.wms(
+                    url + query + '&fq=' + fqsArr[i],
+                    wmsParams
+                );
 
                 overlays[i + 1].on('add', function () {
                     overlays[i + 1].bringToFront();
